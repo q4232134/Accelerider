@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/view_toolbar" />
+
+
+    <com.kuopu.recordmeter.commonTools.SearchEditText
+        android:id="@+id/mSearchView"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/bg_blue"
+        android:gravity="center_vertical"
+        android:hint="搜索"
+        android:paddingLeft="20dp" />
+
+    <FrameLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    </FrameLayout>
+</LinearLayout>
