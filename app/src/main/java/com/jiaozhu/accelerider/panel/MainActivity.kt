@@ -5,9 +5,8 @@ import android.support.v7.app.AlertDialog
 import android.view.Menu
 import android.widget.Toast
 import com.jiaozhu.accelerider.R
-import com.jiaozhu.accelerider.panel.BaseActivity
+import com.jiaozhu.accelerider.panel.fragment.CommListViewFragment
 import com.jiaozhu.accelerider.support.Tools
-import com.kuopu.recordmeter.panel.fragment.CommListViewFragment
 import toast
 
 class MainActivity : BaseActivity() {

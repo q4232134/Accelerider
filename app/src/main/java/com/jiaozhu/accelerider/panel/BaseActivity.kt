@@ -1,9 +1,9 @@
 package com.jiaozhu.accelerider.panel
 
-import BaseFragment
 import android.app.ProgressDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import com.jiaozhu.accelerider.panel.fragment.BaseFragment
 import kotlinx.android.synthetic.main.view_toolbar_comm.*
 
 /**

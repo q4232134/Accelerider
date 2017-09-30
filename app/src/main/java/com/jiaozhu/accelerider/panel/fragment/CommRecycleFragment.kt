@@ -1,4 +1,4 @@
-package com.kuopu.recordmeter.panel.fragment
+package com.jiaozhu.accelerider.panel.fragment
 
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import com.jiaozhu.accelerider.R
 import com.jiaozhu.accelerider.commonTools.BackgroundExecutor
 import com.jiaozhu.accelerider.commonTools.DividerLine
-import com.jiaozhu.accelerider.panel.fragment.BaseFragment
 
 
 /**

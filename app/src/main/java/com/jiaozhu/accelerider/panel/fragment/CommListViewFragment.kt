@@ -1,4 +1,4 @@
-package com.kuopu.recordmeter.panel.fragment
+package com.jiaozhu.accelerider.panel.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
