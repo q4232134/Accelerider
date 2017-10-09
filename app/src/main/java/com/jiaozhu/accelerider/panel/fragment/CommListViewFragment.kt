@@ -9,7 +9,6 @@ import android.widget.BaseAdapter
 import android.widget.ListView
 import com.jiaozhu.accelerider.R
 import com.jiaozhu.accelerider.commonTools.BackgroundExecutor
-import com.jiaozhu.accelerider.panel.fragment.BaseFragment
 import kotlin.properties.Delegates
 
 

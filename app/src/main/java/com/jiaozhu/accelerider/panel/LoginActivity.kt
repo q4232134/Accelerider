@@ -15,6 +15,7 @@ class LoginActivity : BaseLoginActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Preference.userName = "q4232134"
         if (!Preference.token.isEmpty()) toNextActivity()
 
     }
@@ -45,7 +46,12 @@ class LoginActivity : BaseLoginActivity() {
             }
 
             override fun onFailure(statusCode: Int, error: Throwable?) {
-                toast("与服务器通信失败，请检查网络连接")
+                error?.printStackTrace()
+                toast("$statusCode 与服务器通信失败，请检查网络连接")
+            }
+
+            override fun onFinish() {
+                spinnerDialog.dismiss()
             }
 
         })

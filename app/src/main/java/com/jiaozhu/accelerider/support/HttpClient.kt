@@ -1,13 +1,13 @@
 package com.jiaozhu.accelerider.support
-import Preference
+
 import com.jiaozhu.accelerider.commonTools.HttpResponse
 import com.jiaozhu.accelerider.commonTools.Log
-import com.jiaozhu.accelerider.support.Constants
-import com.jiaozhu.accelerider.support.Tools
 import com.loopj.android.http.AsyncHttpClient
 import com.loopj.android.http.RequestParams
 import com.loopj.android.http.ResponseHandlerInterface
 import logTag
+import okhttp3.*
+import java.io.IOException
 
 
 /**
@@ -58,12 +58,39 @@ object HttpClient {
      * @param passWord 密码
      */
     fun login(userName: String, passWord: String, handler: HttpResponse) {
-        val params = basicParams
-        params.add("security", "MD5")
-        params.add("name", userName)
-        params.add("password", Tools.md5Encode(passWord))
-        params.add("clienttype", Constants.UA)
-        post("http://api.usmusic.cn/signup", params, handler)
+//        val params = basicParams
+//        params.add("security", "MD5")
+//        params.add("name", userName)
+//        params.add("password", Tools.md5Encode(passWord))
+//        params.add("clienttype", Constants.UA)
+//        post("http://api.usmusic.cn/login", params, handler)
+
+        val builder = FormBody.Builder()
+                .add("security", "MD5")
+                .add("name", userName)
+                .add("password", Tools.md5Encode(passWord))
+                .add("clienttype", Constants.UA).build()
+
+        //创建okHttpClient对象
+        val mOkHttpClient = OkHttpClient()
+        //创建一个Request
+        val request = Request.Builder()
+                .url("http://api.usmusic.cn/login")
+                .post(builder)
+                .build()
+        //new call
+        val call = mOkHttpClient.newCall(request)
+        //请求加入调度
+        call.enqueue(object : Callback {
+            override fun onFailure(p0: Call?, p1: IOException?) {
+            }
+
+            override fun onResponse(p0: Call, p1: Response) {
+                println(p1.message())
+                println(p1.body()!!.string())
+            }
+        })
+
     }
 
 }
