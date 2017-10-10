@@ -6,8 +6,7 @@ import com.loopj.android.http.AsyncHttpClient
 import com.loopj.android.http.RequestParams
 import com.loopj.android.http.ResponseHandlerInterface
 import logTag
-import okhttp3.*
-import java.io.IOException
+import java.net.URLEncoder
 
 
 /**
@@ -58,39 +57,30 @@ object HttpClient {
      * @param passWord 密码
      */
     fun login(userName: String, passWord: String, handler: HttpResponse) {
-//        val params = basicParams
-//        params.add("security", "MD5")
-//        params.add("name", userName)
-//        params.add("password", Tools.md5Encode(passWord))
-//        params.add("clienttype", Constants.UA)
-//        post("http://api.usmusic.cn/login", params, handler)
-
-        val builder = FormBody.Builder()
-                .add("security", "MD5")
-                .add("name", userName)
-                .add("password", Tools.md5Encode(passWord))
-                .add("clienttype", Constants.UA).build()
-
-        //创建okHttpClient对象
-        val mOkHttpClient = OkHttpClient()
-        //创建一个Request
-        val request = Request.Builder()
-                .url("http://api.usmusic.cn/login")
-                .post(builder)
-                .build()
-        //new call
-        val call = mOkHttpClient.newCall(request)
-        //请求加入调度
-        call.enqueue(object : Callback {
-            override fun onFailure(p0: Call?, p1: IOException?) {
-            }
-
-            override fun onResponse(p0: Call, p1: Response) {
-                println(p1.message())
-                println(p1.body()!!.string())
-            }
-        })
-
+        val params = basicParams
+        params.add("name", userName)
+        params.add("password", Tools.md5Encode(passWord))
+        params.add("clienttype", Constants.UA)
+        post("http://api.usmusic.cn/login?security=md5", params, handler)
     }
+
+
+    /**
+     * 获取当前账号下面的用户列表
+     */
+    fun getUserList(handler: HttpResponse) {
+        val params = basicParams
+        post("http://api.usmusic.cn/userlist?token=${Preference.token}", params, handler)
+    }
+
+    /**
+     * 根据指定路径获取文件列表
+     */
+    fun getFileList(path: String, handler: HttpResponse) {
+        val params = basicParams
+        val url = "http://api.usmusic.cn/filelist?token=${Preference.token}&uk=${Preference.uk}&path=${URLEncoder.encode(path,"utf-8")}"
+        post(url, params, handler)
+    }
+
 
 }

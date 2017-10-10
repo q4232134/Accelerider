@@ -5,8 +5,8 @@
     tools:context=".MainActivity">
 
     <item
-        android:id="@+id/action_logout"
-        android:title="登出"
+        android:id="@+id/action_change_user"
+        android:title="切换账户"
         android:visible="true"
         app:showAsAction="always" />
 </menu>

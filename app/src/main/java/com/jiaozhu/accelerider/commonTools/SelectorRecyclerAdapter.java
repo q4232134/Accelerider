@@ -54,6 +54,14 @@ public abstract class SelectorRecyclerAdapter<T extends RecyclerView.ViewHolder>
         this.itemListener = itemListener;
     }
 
+    public OnItemClickListener getItemClickListener() {
+        return itemClickListener;
+    }
+
+    public void setItemClickListener(OnItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
+
     /**
      * 设置actionMode
      *

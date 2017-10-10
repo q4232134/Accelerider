@@ -61,7 +61,7 @@ class CommRecycleFragment : BaseFragment() {
 
     companion object {
         fun newInstance(list: ArrayList<*>, adapter: RecyclerView.Adapter<*>,
-                        onRefresh: OnRefreshListener?): CommRecycleFragment {
+                        onRefresh: OnRefreshListener? = null): CommRecycleFragment {
             val fragment = CommRecycleFragment()
             fragment.list = list
             fragment.adapter = adapter

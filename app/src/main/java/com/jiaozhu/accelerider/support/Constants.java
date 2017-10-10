@@ -5,9 +5,8 @@ import android.provider.Settings;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by apple on 15/10/30.
@@ -110,24 +109,14 @@ public class Constants {
 
 
     /**
-     * 允许下载的文件类型
+     * 文件类型对应的图标
      */
-    public static final Set<String> ACCESS_DOWN_FILE_TYPE = getAccessDownFileType();
+    public static final Map<String, Integer> FILE_ICON_MAP = getFileIconMap();
 
-    private static Set<String> getAccessDownFileType() {
-        Set<String> set = new HashSet<>();
-        set.add(".txt");
-        set.add(".jpg");
-        set.add(".png");
-        set.add(".mp4");
-        set.add(".avi");
-        set.add(".doc");
-        set.add(".docx");
-        set.add(".xls");
-        set.add(".xlsx");
-        set.add(".ppt");
-        set.add(".pdf");
-        return set;
+    private static Map<String, Integer> getFileIconMap() {
+        Map<String, Integer> map = new Hashtable<>();
+
+        return map;
     }
 
     /**

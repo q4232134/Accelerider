@@ -3,6 +3,7 @@ package com.jiaozhu.accelerider.panel
 import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
+import com.alibaba.fastjson.JSONObject
 import com.jiaozhu.accelerider.commonTools.HttpResponse
 import com.jiaozhu.accelerider.support.HttpClient
 import com.jiaozhu.accelerider.support.Preference
@@ -15,9 +16,6 @@ class LoginActivity : BaseLoginActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Preference.userName = "q4232134"
-        if (!Preference.token.isEmpty()) toNextActivity()
-
     }
 
     /**
@@ -38,16 +36,24 @@ class LoginActivity : BaseLoginActivity() {
      * *
      * @return
      */
-    internal override fun login(name: String, password: String): Boolean {
+    override fun login(name: String, password: String): Boolean {
         spinnerDialog.show()
         spinnerDialog.setTitle("正在登陆")
         HttpClient.login(name, password, object : HttpResponse() {
-            override fun onSuccess(statusCode: Int, result: String?) {
+            override fun onSuccess(statusCode: Int, result: JSONObject) {
+                val flag = result.getInteger("errno")
+                if (flag == 0) {
+                    toast("登陆成功")
+                    Preference.token = result.getString("token")
+                    toNextActivity()
+                }
             }
 
-            override fun onFailure(statusCode: Int, error: Throwable?) {
-                error?.printStackTrace()
-                toast("$statusCode 与服务器通信失败，请检查网络连接")
+            override fun onFailure(statusCode: Int, msg: String, error: Throwable) {
+                if (statusCode == 409)
+                    toast("登录失败")
+                else
+                    toast(msg)
             }
 
             override fun onFinish() {
@@ -72,7 +78,6 @@ class LoginActivity : BaseLoginActivity() {
         val intent = Intent()
         intent.setClass(this@LoginActivity, MainActivity::class.java)
         startActivity(intent)
-        spinnerDialog.dismiss()
         finish()
     }
 

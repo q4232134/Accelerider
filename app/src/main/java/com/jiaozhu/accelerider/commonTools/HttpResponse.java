@@ -2,6 +2,8 @@ package com.jiaozhu.accelerider.commonTools;
 
 import android.support.annotation.Nullable;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.ResponseHandlerInterface;
 
@@ -17,13 +19,14 @@ public abstract class HttpResponse extends AsyncHttpResponseHandler {
     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
         String temp = getString(responseBody);
         Log.d("HttpResponse", temp);
-        onSuccess(statusCode, temp);
-        System.out.println(new String(this.getCharset()));
+        onSuccess(statusCode, JSON.parseObject(temp));
     }
 
     @Override
     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-        onFailure(statusCode, error);
+        String msg;
+        msg = statusCode + "与服务器通信失败";
+        onFailure(statusCode, msg, error);
     }
 
     @Override
@@ -42,7 +45,7 @@ public abstract class HttpResponse extends AsyncHttpResponseHandler {
         return str;
     }
 
-    abstract public void onSuccess(int statusCode, String result);
+    abstract public void onSuccess(int statusCode, JSONObject result);
 
-    abstract public void onFailure(int statusCode, Throwable error);
+    abstract public void onFailure(int statusCode, String msg, Throwable error);
 }

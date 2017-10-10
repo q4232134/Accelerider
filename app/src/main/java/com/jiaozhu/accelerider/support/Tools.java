@@ -38,18 +38,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * Created by Administrator on 2014/6/20.
@@ -684,148 +676,23 @@ public class Tools {
     }
 
     /**
-     * 获取随机汉字
+     * 转换文件大小
      *
-     * @param len
+     * @param fileS
      * @return
      */
-    public static String getRandom(int len) {
-        String ret = "";
-        for (int i = 0; i < len; i++) {
-            String str = null;
-            int hightPos, lowPos; // 定义高低位
-            Random random = new Random();
-            hightPos = (176 + Math.abs(random.nextInt(39))); //获取高位值
-            lowPos = (161 + Math.abs(random.nextInt(93))); //获取低位值
-            byte[] b = new byte[2];
-            b[0] = (new Integer(hightPos).byteValue());
-            b[1] = (new Integer(lowPos).byteValue());
-            try {
-                str = new String(b, "GBk"); //转成中文
-            } catch (UnsupportedEncodingException ex) {
-                ex.printStackTrace();
-            }
-            ret += str;
+    public static String getSizeString(long fileS) {
+        String size = "";
+        DecimalFormat df = new DecimalFormat("#.00");
+        if (fileS < 1024) {
+            size = df.format((double) fileS) + "BT";
+        } else if (fileS < 1048576) {
+            size = df.format((double) fileS / 1024) + "KB";
+        } else if (fileS < 1073741824) {
+            size = df.format((double) fileS / 1048576) + "MB";
+        } else {
+            size = df.format((double) fileS / 1073741824) + "GB";
         }
-        return ret;
+        return size;
     }
-
-    /**
-     * 首字母大写
-     *
-     * @param name
-     * @return
-     */
-    public static String captureName(String name) {
-        char[] cs = name.toCharArray();
-        cs[0] -= 32;
-        return String.valueOf(cs);
-
-    }
-
-    /**
-     * 随机数据生成器
-     *
-     * @param clazz 需要生成的数据类型
-     * @param num   生成的数量
-     * @param map   可选值<属性名称,List<可选值>>
-     * @param <T>
-     * @return 生成好的数据
-     */
-    public static Random random = new Random();
-
-    public static <T> List<T> getRandomObject(Class<T> clazz, int num, Map<String, List<Object>> map) {
-        List<T> list = new ArrayList<>();
-        ArrayList<Field> fields = new ArrayList<>();
-        Class tempClazz = clazz;
-        while (tempClazz != null) {
-            for (Field temp : tempClazz.getDeclaredFields()) {
-                //去除静态属性
-                if (Modifier.isStatic(temp.getModifiers())) continue;
-                //特殊处理安卓特有属性
-                if (temp.getName().startsWith("shadow$_")) continue;
-                temp.setAccessible(true);
-                fields.add(temp);
-            }
-            tempClazz = tempClazz.getSuperclass();
-        }
-        int count = 0;
-        try {
-            //创建对应的对象并进行赋值
-            for (int i = 0; i < num; i++) {
-                T entity = (T) clazz.newInstance();
-                for (Field temp : fields) {
-                    Class type = temp.getType();
-                    if (null == temp.get(entity) || temp.get(entity).equals(0) || (map != null && map.containsKey(temp.getName()))) {
-                        Object value;
-                        List valueList;
-                        if (map == null)
-                            valueList = null;
-                        else
-                            valueList = map.get(temp.getName());
-                        //是否包含对应的指定值
-                        if (valueList == null) {
-                            value = null;
-                        } else {
-                            value = randomTake(valueList);
-                        }
-                        if ((Integer.TYPE == type) || (Integer.class == type)) {//是否为integer
-                            setValue(temp, entity, random.nextInt(10000), value);
-                        } else if (String.class == type) {//是否为String
-                            setValue(temp, entity, Tools.getRandom(random.nextInt(30)), value);
-                        } else if ((Long.TYPE == type) || (Long.class == type)) {//是否为long
-                            setValue(temp, entity, random.nextLong(), value);
-                        } else if ((Float.TYPE == type) || (Float.class == type)) {//是否为float
-                            setValue(temp, entity, random.nextFloat(), value);
-                        } else if ((Short.TYPE == type) || (Short.class == type)) {//是否为short
-                            setValue(temp, entity, random.nextInt(100), value);
-                        } else if ((Double.TYPE == type) || (Double.class == type)) {//是否为double
-                            setValue(temp, entity, random.nextDouble() * 1000, value);
-                        } else if (Date.class == type) {//是否为date
-                            Date date = new Date(random.nextLong());
-                            setValue(temp, entity, date, value);
-                        } else if (Boolean.TYPE == type || Boolean.class == type) {
-                            setValue(temp, entity, random.nextBoolean(), value);
-                        } else if (Character.TYPE == type || Character.class == type) {//是否为char
-                            setValue(temp, entity, random.nextInt(225), value);
-                        }
-                    }
-                }
-                System.out.println(count++);
-                list.add(entity);
-            }
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    /**
-     * 为指定对象的属性赋值
-     *
-     * @param field  指定属性
-     * @param entity 指定对象
-     * @param def    默认值（当value为null时使用默认值）
-     * @param value  指定值
-     * @throws IllegalAccessException
-     */
-    private static void setValue(Field field, Object entity, Object def, Object value) throws IllegalAccessException {
-        Object temp;
-        if (value == null) temp = def;
-        else
-            temp = value;
-        field.set(entity, temp);
-    }
-
-
-    /**
-     * 随机获取列表中的元素
-     */
-    public static <T> T randomTake(List<T> list) {
-        return list.get(random.nextInt(list.size()));
-    }
-
-
 }

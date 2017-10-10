@@ -1,7 +1,6 @@
 package com.jiaozhu.accelerider.support
 import android.content.Context
 import android.content.SharedPreferences
-import com.jiaozhu.accelerider.support.UserInfo
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -23,6 +22,9 @@ class Preference<T>(val name: String, private val default: T)
         var userName by Preference("UserName", "")
         var passWord by Preference("PassWord", "")
         var token by Preference("token", "")
+        var uk by Preference("uk", "")
+        var name by Preference("name", "")
+        var userList by Preference("userList", "")
         var iSavePassWord by Preference("ISavePassWord", false)
     }
 
