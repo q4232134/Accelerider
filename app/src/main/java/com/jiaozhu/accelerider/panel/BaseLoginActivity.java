@@ -11,7 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jiaozhu.accelerider.R;
-import com.jiaozhu.accelerider.support.Preference;
+import com.jiaozhu.accelerider.support.Preferences;
 
 /**
  * Created by jiaozhu on 16/7/20.
@@ -38,7 +38,7 @@ public abstract class BaseLoginActivity extends BaseActivity {
         mTitle = findViewById(R.id.title);
 
         mTitle.setText(R.string.app_name);
-        mName.setText(Preference.Companion.getUserName());
+        mName.setText(Preferences.Companion.getUserName());
 
         mPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

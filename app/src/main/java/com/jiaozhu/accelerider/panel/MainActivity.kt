@@ -1,5 +1,6 @@
 package com.jiaozhu.accelerider.panel
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.view.Menu
@@ -17,7 +18,7 @@ import com.jiaozhu.accelerider.model.UserModel
 import com.jiaozhu.accelerider.panel.adapter.FileAdapter
 import com.jiaozhu.accelerider.panel.fragment.CommRecycleFragment
 import com.jiaozhu.accelerider.support.HttpClient
-import com.jiaozhu.accelerider.support.Preference
+import com.jiaozhu.accelerider.support.Preferences
 import com.jiaozhu.accelerider.support.Tools
 import kotlinx.android.synthetic.main.view_toolbar.*
 import kotlinx.android.synthetic.main.view_toolbar_comm.*
@@ -39,16 +40,48 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
         fragment = CommRecycleFragment.newInstance(fileList, adapter)
         supportFragmentManager.beginTransaction().add(R.id.layout, fragment).commit()
         adapter.itemClickListener = this
+        adapter.onDownloadClickListener = SelectorRecyclerAdapter.OnItemClickListener { view, position ->
+            addDownload(fileList[position])
+        }
         init()
     }
 
     private fun init() {
-        if (Preference.uk.isEmpty())
+        if (Preferences.uk.isEmpty())
             getUserList()
         else {
+            stack.clear()
             stack.push(FileModel())
             fresh()
         }
+    }
+
+    /**
+     * 加入下载列表
+     */
+    private fun addDownload(vararg fileModels: FileModel) {
+        spinnerDialog.show()
+        spinnerDialog.setTitle("正在获取下载地址")
+        HttpClient.getDownloadUrl(fileModels.toList(), object : HttpResponse() {
+
+            override fun onSuccess(statusCode: Int, result: JSONObject) {
+                println(result.toJSONString())
+                result.getJSONObject("links").entries.forEach {
+                    val name = it.key
+                    val url = (it.value as List<String>)[0]
+                }
+            }
+
+            override fun onFailure(statusCode: Int, msg: String?, error: Throwable?) {
+                toast(msg)
+            }
+
+            override fun onFinish() {
+                spinnerDialog.dismiss()
+            }
+
+        })
+//        DLManager.getInstance(this).dlStart(fileModel)
     }
 
 
@@ -61,8 +94,8 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
         HttpClient.getUserList(object : HttpResponse() {
             override fun onSuccess(statusCode: Int, result: JSONObject) {
                 if (result.getInteger("errno") == 0) {
-                    Preference.userList = result.getString("userlist")
-                    showUserListDialog(JSON.parseArray(Preference.userList, UserModel::class.java))
+                    Preferences.userList = result.getString("userlist")
+                    showUserListDialog(JSON.parseArray(Preferences.userList, UserModel::class.java))
                 }
             }
 
@@ -82,10 +115,11 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
      */
     private fun showUserListDialog(userList: List<UserModel>) {
         SingerPicker.showDialog(this, "账户列表", userList, { position, description ->
-            Preference.uk = userList[position].Uk
-            Preference.name = userList[position].Name
+            Preferences.uk = userList[position].Uk
+            Preferences.name = userList[position].Name
+            init()
             fresh()
-        }, userList.indexOfFirst { it.Name == Preference.uk }, true, true)
+        }, userList.indexOfFirst { it.Name == Preferences.uk }, true, true)
     }
 
     /**
@@ -99,7 +133,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             override fun onSuccess(statusCode: Int, result: JSONObject?) {
                 if (addStack)
                     stack.push(file)
-                mTitle.text = Preference.name + (file?.path ?: "/")
+                mTitle.text = Preferences.name + (file?.path ?: "/")
                 fileList.clear()
                 fileList.addAll(result?.getJSONArray("list")?.toJavaList(FileModel::class.java) as List<FileModel>)
                 fragment.adapter?.notifyDataSetChanged()
@@ -144,7 +178,9 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     }
 
     override fun onItemClick(view: View?, position: Int) {
-        fresh(fileList[position])
+        val model = fileList[position]
+        if (model.isdir != 0)
+            fresh(model)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -155,8 +191,17 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_change_user -> getUserList()
+            R.id.action_setting -> toSettingActivity()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    /**
+     * 进入设定界面
+     */
+    private fun toSettingActivity() {
+        val i = Intent(this@MainActivity, SettingActivity::class.java)
+        startActivity(i)
     }
 
 

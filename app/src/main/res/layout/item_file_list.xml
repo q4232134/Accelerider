@@ -1,43 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="65dp"
     android:background="?android:attr/selectableItemBackground"
+    android:minHeight="60dp"
     android:orientation="horizontal"
     android:paddingBottom="@dimen/main_item_padding"
     android:paddingTop="@dimen/main_item_padding">
 
     <ImageView
         android:id="@+id/mImageView"
-        android:layout_width="31dp"
-        android:layout_height="36dp"
+        android:layout_width="36dp"
+        android:layout_height="42dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginBottom="3dp"
-        android:layout_marginLeft="@dimen/main_item_padding"
-        android:layout_marginTop="3dp"
+        android:layout_marginLeft="3dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ico_apk" />
 
     <View
         android:id="@+id/mSelectView"
-        android:layout_width="2dp"
-        android:layout_height="match_parent"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_alignBottom="@id/mImageView"
+        android:layout_alignTop="@id/mImageView"
         android:background="@color/main_item_selected"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
     <TextView
         android:id="@+id/mTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
         android:layout_alignTop="@+id/mImageView"
-        android:layout_marginLeft="@dimen/abc_button_padding_horizontal_material"
-        android:layout_toEndOf="@+id/mImageView"
-        android:layout_toStartOf="@+id/bgLayout"
-        android:nestedScrollingEnabled="true"
-        android:textSize="@dimen/text_normal_size" />
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_toLeftOf="@+id/mDownload"
+        android:layout_toRightOf="@id/mImageView"
+        android:ellipsize="middle"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textSize="@dimen/text_normal_size"
+        tools:text="12312312312" />
 
     <TextView
         android:id="@+id/mTime"
@@ -45,41 +52,32 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/mImageView"
         android:layout_alignStart="@+id/mTitle"
+        android:layout_marginBottom="-4dp"
         android:text="1990-22-12 11:23"
         android:textSize="@dimen/text_small_size" />
 
-    <LinearLayout
-        android:id="@+id/bgLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignTop="@id/mImageView"
-        android:layout_alignBottom="@id/mImageView"
+
+    <ImageButton
+        android:id="@+id/mDownload"
+        android:layout_width="30dp"
+        android:layout_height="40dp"
+        android:layout_above="@+id/mSize"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="@dimen/main_item_padding"
-        android:orientation="vertical">
+        android:layout_marginRight="3dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/stat_sys_download"
+        android:tint="@color/colorPrimary" />
 
-
-        <ImageButton
-            android:id="@+id/mDownload"
-            android:layout_width="30dp"
-            android:layout_height="25dp"
-            android:layout_above="@+id/mSize"
-            android:layout_alignParentEnd="true"
-            android:layout_gravity="center_horizontal"
-            android:background="@android:color/transparent"
-            android:src="@android:drawable/stat_sys_download"
-            android:tint="@color/colorPrimary" />
-
-        <TextView
-            android:id="@+id/mSize"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignTop="@id/mTime"
-            android:maxLines="1"
-            android:gravity="center_horizontal"
-            android:text="3.4M"
-            android:textSize="@dimen/text_small_size" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/mSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/mDownload"
+        android:layout_alignTop="@id/mTime"
+        android:layout_marginLeft="50dp"
+        android:gravity="center_horizontal"
+        android:maxLines="1"
+        android:textSize="@dimen/text_small_size"
+        tools:text="3.4M" />
 
 </RelativeLayout>

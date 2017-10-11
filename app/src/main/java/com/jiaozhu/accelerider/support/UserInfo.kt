@@ -6,7 +6,7 @@ import android.content.Context
  */
 
 object UserInfo {
-    val id get() = Preference.userName
+    val id get() = Preferences.userName
     var name = ""
     lateinit var context: Context
 }

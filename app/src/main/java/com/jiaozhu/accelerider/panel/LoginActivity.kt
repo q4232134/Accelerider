@@ -6,7 +6,8 @@ import android.widget.EditText
 import com.alibaba.fastjson.JSONObject
 import com.jiaozhu.accelerider.commonTools.HttpResponse
 import com.jiaozhu.accelerider.support.HttpClient
-import com.jiaozhu.accelerider.support.Preference
+import com.jiaozhu.accelerider.support.Preferences
+import kotlinx.android.synthetic.main.activity_login.*
 import toast
 
 
@@ -16,6 +17,13 @@ class LoginActivity : BaseLoginActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mCheckBox.isChecked = Preferences.iSavePassWord
+        mCheckBox.setOnCheckedChangeListener({ _, flag ->
+            if (flag) {
+                Preferences.iSavePassWord = flag
+            }
+        })
+        if (Preferences.iSavePassWord) mPassword.setText(Preferences.passWord)
     }
 
     /**
@@ -43,8 +51,9 @@ class LoginActivity : BaseLoginActivity() {
             override fun onSuccess(statusCode: Int, result: JSONObject) {
                 val flag = result.getInteger("errno")
                 if (flag == 0) {
-                    toast("登陆成功")
-                    Preference.token = result.getString("token")
+                    Preferences.token = result.getString("token")
+                    Preferences.userName = name
+                    if (Preferences.iSavePassWord) Preferences.passWord = password
                     toNextActivity()
                 }
             }
@@ -68,7 +77,7 @@ class LoginActivity : BaseLoginActivity() {
      * 登录验证通过之后的动作
      */
     override fun onLoginSuccess(name: String, password: String) {
-        Preference.userName = name
+        Preferences.userName = name
     }
 
     /**

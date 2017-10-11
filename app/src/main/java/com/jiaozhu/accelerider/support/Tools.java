@@ -18,7 +18,6 @@ import android.media.ThumbnailUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
 import android.text.Html;
@@ -503,17 +502,6 @@ public class Tools {
     }
 
     /**
-     * 清除数据库
-     *
-     * @param context
-     * @return
-     */
-    public static boolean deleteDataBase(Context context) {
-        return context.deleteDatabase(Constants.DB_NAME);
-    }
-
-
-    /**
      * 获取或者生成缩略图
      *
      * @param fileName
@@ -626,15 +614,6 @@ public class Tools {
         return false;
     }
 
-    /**
-     * 导出数据库文件
-     *
-     * @param context
-     */
-    public static boolean getBDFile(Context context) {
-        String path = context.getDatabasePath(Constants.DB_NAME).getPath();
-        return copyFile(path, Environment.getExternalStorageDirectory().getPath() + File.separator + Constants.DB_NAME);
-    }
 
     private static DecimalFormat format2 = new DecimalFormat("#0.00");
     private static DecimalFormat format5 = new DecimalFormat("#0.00000");
@@ -683,7 +662,7 @@ public class Tools {
      */
     public static String getSizeString(long fileS) {
         String size = "";
-        DecimalFormat df = new DecimalFormat("#.00");
+        DecimalFormat df = new DecimalFormat("#.0");
         if (fileS < 1024) {
             size = df.format((double) fileS) + "BT";
         } else if (fileS < 1048576) {

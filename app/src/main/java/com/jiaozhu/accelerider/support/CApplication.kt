@@ -2,9 +2,6 @@ package com.jiaozhu.accelerider.support
 import android.app.Application
 import com.jiaozhu.accelerider.commonTools.CrashHandler
 import com.jiaozhu.accelerider.commonTools.Log
-import com.jiaozhu.accelerider.support.Constants
-import com.jiaozhu.accelerider.support.Tools
-import com.jiaozhu.accelerider.support.UserInfo
 import java.io.File
 
 /**

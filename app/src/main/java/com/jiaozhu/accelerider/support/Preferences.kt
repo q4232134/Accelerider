@@ -1,13 +1,16 @@
 package com.jiaozhu.accelerider.support
+
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Environment
+import java.io.File
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 /**
  * Created by jiaozhu on 2017/6/27.
  */
-class Preference<T>(val name: String, private val default: T)
+class Preferences<T>(val name: String, private val default: T)
     : ReadWriteProperty<Any?, T> {
 
     companion object {
@@ -16,16 +19,22 @@ class Preference<T>(val name: String, private val default: T)
          * 配置文件名称
          */
         val SHAREDPREFERENCES_NAME = "Setting"
+        val SETTING_ADDRESS = "address"
 
         val prefs: SharedPreferences = context.getSharedPreferences(SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE)
 
-        var userName by Preference("UserName", "")
-        var passWord by Preference("PassWord", "")
-        var token by Preference("token", "")
-        var uk by Preference("uk", "")
-        var name by Preference("name", "")
-        var userList by Preference("userList", "")
-        var iSavePassWord by Preference("ISavePassWord", false)
+        var userName by Preferences("UserName", "")
+        var passWord by Preferences("PassWord", "")
+        var token by Preferences("token", "")
+        var uk by Preferences("uk", "")
+        var name by Preferences("name", "")
+        var userList by Preferences("userList", "")
+        var addressSave by Preferences(SETTING_ADDRESS, "Download")
+        var iSavePassWord by Preferences("ISavePassWord", false)
+        //真正的下载地址
+        val address: String
+            get() =
+                Environment.getExternalStorageDirectory().path + File.separatorChar + addressSave + File.separatorChar
     }
 
 

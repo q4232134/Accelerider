@@ -1,7 +1,6 @@
 package com.jiaozhu.accelerider.support;
 
 import android.content.Context;
-import android.provider.Settings;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -14,23 +13,11 @@ import java.util.Map;
 public class Constants {
 
     public Constants(Context context) {
-        FILE_DIR = context.getExternalFilesDir(null).getPath();
         CACHE_DIR = context.getExternalCacheDir().getPath();
-        ANDROID_ID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         APK_VERSION = Tools.getVersion(context);
     }
 
-    public static String FILE_DIR;
     public static String APK_VERSION;
-
-    /**
-     * 推送注册系统ID
-     */
-    public static final String SYS_Name = "rtm_002";
-    /**
-     * 推送注册用户ID
-     */
-    public static final String USER_UNIT = "nx_sw001";
 
     /**
      * 通用时间格式化
@@ -47,25 +34,17 @@ public class Constants {
     public static String CACHE_DIR;
 
     /**
-     * 数据库名称
-     */
-    public static final String DB_NAME = "rtm.db";
-    /**
-     * 数据库版本
-     */
-    public static final int DB_VERSION = 2;
-    /**
      * UA标志
      */
     public static final String UA = "android";
     /**
-     * 设备标识
+     * 缓存文件高度
      */
-    public static String ANDROID_ID;
+    public static final int CACHE_HEIGHT = 512;
     /**
-     * 历史数据显示条数
+     * 缓存文件宽度
      */
-    public static final int HISTORY_LENGTH = 20;
+    public static final int CACHE_WIDTH = 512;
 
     public static boolean isDebug = true;
 
@@ -78,34 +57,6 @@ public class Constants {
 
     public static final String[] CONFIGS = {
     };
-
-    /**
-     * IP地址验证的正则表达式
-     */
-    public static final String IP_CHECK_STRING = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-
-    /**
-     * 缓存文件高度
-     */
-    public static final int CACHE_HEIGHT = 512;
-    /**
-     * 缓存文件宽度
-     */
-    public static final int CACHE_WIDTH = 512;
-
-    /**
-     * 默认查询区间
-     */
-    public static final long DURATION = 36L * 30L * 24L * 60L * 60L * 1000L;//查询区间为3年
-
-    public static class Icon {
-        public Integer src, bg;
-
-        public Icon(Integer src, Integer bg) {
-            this.src = src;
-            this.bg = bg;
-        }
-    }
 
 
     /**

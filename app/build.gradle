@@ -1,7 +1,5 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
@@ -37,6 +35,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:26.1.0'
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.loopj.android:android-async-http:1.4.9'
-    compile 'cn.aigestudio.downloader:Downloader:1.4.3'
+    compile 'com.liulishuo.filedownloader:library:1.6.6'
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.17'
+
 }

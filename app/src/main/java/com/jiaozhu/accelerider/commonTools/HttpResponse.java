@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.ResponseHandlerInterface;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -24,15 +23,12 @@ public abstract class HttpResponse extends AsyncHttpResponseHandler {
 
     @Override
     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+        error.printStackTrace();
         String msg;
         msg = statusCode + "与服务器通信失败";
         onFailure(statusCode, msg, error);
     }
 
-    @Override
-    public void onPostProcessResponse(ResponseHandlerInterface instance, cz.msebera.android.httpclient.HttpResponse response) {
-        System.out.println(response.getEntity());
-    }
 
     @Nullable
     private String getString(byte[] responseBody) {

@@ -22,6 +22,7 @@ class FileAdapter(val context: Context, val list: ArrayList<FileModel>) : Select
     override fun getItemCount(): Int = list.size
     private val resource: Resources = context.resources
     private val format = SimpleDateFormat("hh:mm  yyyy-MM-dd")
+    var onDownloadClickListener: OnItemClickListener? = null//下载按钮单击监听
 
     override fun onCreateHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_file_list, parent, false)
@@ -38,7 +39,7 @@ class FileAdapter(val context: Context, val list: ArrayList<FileModel>) : Select
                 mSelectView.visibility = View.GONE
                 background = null
             }
-            if (model.isdir) {
+            if (model.isdir != 0) {
                 mImageView.setImageResource(R.drawable.ico_folder)
                 mDownload.visibility = View.GONE
                 mSize.text = ""
@@ -52,6 +53,7 @@ class FileAdapter(val context: Context, val list: ArrayList<FileModel>) : Select
 
             mTitle.text = model.server_filename
             mTime.text = format.format(model.server_mtime * 1000)
+            mDownload.setOnClickListener { onDownloadClickListener?.onItemClick(mDownload, position) }
         }
     }
 
@@ -68,5 +70,4 @@ class FileAdapter(val context: Context, val list: ArrayList<FileModel>) : Select
         }
         return temp
     }
-
 }

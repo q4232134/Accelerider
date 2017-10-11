@@ -1,7 +1,9 @@
 package com.jiaozhu.accelerider.support
 
+import com.alibaba.fastjson.JSON
 import com.jiaozhu.accelerider.commonTools.HttpResponse
 import com.jiaozhu.accelerider.commonTools.Log
+import com.jiaozhu.accelerider.model.FileModel
 import com.loopj.android.http.AsyncHttpClient
 import com.loopj.android.http.RequestParams
 import com.loopj.android.http.ResponseHandlerInterface
@@ -14,7 +16,7 @@ import java.net.URLEncoder
  */
 object HttpClient {
     private val client: AsyncHttpClient = AsyncHttpClient()
-    private val token: String get() = Preference.token
+    private val token: String get() = Preferences.token
 
     init {
         client.setMaxRetriesAndTimeout(0, Constants.CONNECT_TIME_OUT + Constants.RESPONSE_TIME_OUT)
@@ -70,7 +72,7 @@ object HttpClient {
      */
     fun getUserList(handler: HttpResponse) {
         val params = basicParams
-        post("http://api.usmusic.cn/userlist?token=${Preference.token}", params, handler)
+        post("http://api.usmusic.cn/userlist?token=${Preferences.token}", params, handler)
     }
 
     /**
@@ -78,9 +80,18 @@ object HttpClient {
      */
     fun getFileList(path: String, handler: HttpResponse) {
         val params = basicParams
-        val url = "http://api.usmusic.cn/filelist?token=${Preference.token}&uk=${Preference.uk}&path=${URLEncoder.encode(path,"utf-8")}"
+        val url = "http://api.usmusic.cn/filelist?token=${Preferences.token}&uk=${Preferences.uk}&path=${URLEncoder.encode(path, "utf-8")}"
         post(url, params, handler)
     }
 
+    /**
+     * 批量获取下载地址
+     */
+    fun getDownloadUrl(files: List<FileModel>, handler: HttpResponse) {
+        val params = basicParams
+        params.put("files", JSON.toJSONString(files))
+        post("http://api.usmusic.cn/filelinks?token=${Preferences.token}" +
+                "&uk=${Preferences.uk}&method=APPID", params, handler)
+    }
 
 }
