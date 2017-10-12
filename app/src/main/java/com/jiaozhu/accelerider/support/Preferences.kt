@@ -19,7 +19,7 @@ class Preferences<T>(val name: String, private val default: T)
          * 配置文件名称
          */
         val SHAREDPREFERENCES_NAME = "Setting"
-        val SETTING_ADDRESS = "address"
+        val SETTING_ADDRESS = "path"
 
         val prefs: SharedPreferences = context.getSharedPreferences(SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE)
 
@@ -29,12 +29,12 @@ class Preferences<T>(val name: String, private val default: T)
         var uk by Preferences("uk", "")
         var name by Preferences("name", "")
         var userList by Preferences("userList", "")
-        var addressSave by Preferences(SETTING_ADDRESS, "Download")
+        var path by Preferences(SETTING_ADDRESS, "Download")
         var iSavePassWord by Preferences("ISavePassWord", false)
         //真正的下载地址
-        val address: String
+        val DownloadPath: String
             get() =
-                Environment.getExternalStorageDirectory().path + File.separatorChar + addressSave + File.separatorChar
+                Environment.getExternalStorageDirectory().path + File.separatorChar + path + File.separatorChar
     }
 
 

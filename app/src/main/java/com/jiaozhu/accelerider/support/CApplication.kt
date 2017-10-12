@@ -2,6 +2,7 @@ package com.jiaozhu.accelerider.support
 import android.app.Application
 import com.jiaozhu.accelerider.commonTools.CrashHandler
 import com.jiaozhu.accelerider.commonTools.Log
+import com.liulishuo.filedownloader.FileDownloader
 import java.io.File
 
 /**
@@ -19,6 +20,8 @@ class CApplication : Application() {
         Constants(this)
         Constants.isDebug = Tools.isDebug(this)
         Log.setLevel(if (Constants.isDebug) Log.VERBOSE else Log.ASSERT)
+        FileDownloader.setup(this)
+        FileDownloader.getImpl().setMaxNetworkThreadCount(2)
     }
 
 

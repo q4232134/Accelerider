@@ -1,6 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
         android:dialogMessage="默认的下载地址(从根目录开始：XXX/XXX/XXX形式)"
-        android:key="address"
+        android:key="path"
         android:title="下载地址" />
 </PreferenceScreen>

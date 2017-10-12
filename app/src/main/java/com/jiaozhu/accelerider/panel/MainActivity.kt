@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.jiaozhu.accelerider.R
+import com.jiaozhu.accelerider.commonTools.DownloadTools
 import com.jiaozhu.accelerider.commonTools.HttpResponse
 import com.jiaozhu.accelerider.commonTools.SelectorRecyclerAdapter
 import com.jiaozhu.accelerider.commonTools.SingerPicker
@@ -17,9 +18,12 @@ import com.jiaozhu.accelerider.model.FileModel
 import com.jiaozhu.accelerider.model.UserModel
 import com.jiaozhu.accelerider.panel.adapter.FileAdapter
 import com.jiaozhu.accelerider.panel.fragment.CommRecycleFragment
+import com.jiaozhu.accelerider.panel.taskManger.TasksManager
+import com.jiaozhu.accelerider.panel.taskManger.TasksManagerActivity
 import com.jiaozhu.accelerider.support.HttpClient
 import com.jiaozhu.accelerider.support.Preferences
-import com.jiaozhu.accelerider.support.Tools
+import com.liulishuo.filedownloader.FileDownloader
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.view_toolbar.*
 import kotlinx.android.synthetic.main.view_toolbar_comm.*
 import toast
@@ -31,6 +35,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     private val fileList: ArrayList<FileModel> = arrayListOf()
     private lateinit var adapter: FileAdapter
     private val stack = Stack<FileModel>()
+    private val listener get() = DownloadTools.downloadListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +49,18 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             addDownload(fileList[position])
         }
         init()
+        initDownload()
+        mBtn.setOnClickListener {
+            val i = Intent(this@MainActivity, TasksManagerActivity::class.java)
+            startActivity(i)
+        }
+    }
+
+    /**
+     * 初始化下载
+     */
+    private fun initDownload() {
+        TasksManager.impl.onCreate()
     }
 
     private fun init() {
@@ -69,6 +86,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                 result.getJSONObject("links").entries.forEach {
                     val name = it.key
                     val url = (it.value as List<String>)[0]
+                    TasksManager.impl.createTask(url, Preferences.DownloadPath + name, name)
                 }
             }
 
@@ -81,7 +99,6 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             }
 
         })
-//        DLManager.getInstance(this).dlStart(fileModel)
     }
 
 
@@ -152,20 +169,6 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
 
 
     /**
-     * 开始同步
-     */
-    private fun syn() {
-        if (!Tools.isConnect(this)) {
-            toast("无可用网络！")
-            return
-        }
-        if (!Tools.isWifi(this)) {
-            showNetWarnDialog()
-        } else {
-        }
-    }
-
-    /**
      * 弹出蜂窝网络警告对话框
      */
     private fun showNetWarnDialog() {
@@ -192,6 +195,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
         when (item.itemId) {
             R.id.action_change_user -> getUserList()
             R.id.action_setting -> toSettingActivity()
+            R.id.action_fresh -> fresh(addStack = false)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -219,6 +223,13 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             finish()
             System.exit(0)
         }
+    }
+
+
+    override fun onDestroy() {
+        TasksManager.impl.onDestroy()
+        FileDownloader.getImpl().pauseAll()
+        super.onDestroy()
     }
 }
 

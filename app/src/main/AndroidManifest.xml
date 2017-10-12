@@ -21,6 +21,9 @@
             android:name=".panel.SettingActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"></activity>
         <activity
+            android:name=".panel.taskManger.TasksManagerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"></activity>
+        <activity
             android:name=".panel.LoginActivity"
             android:launchMode="singleTop"
             android:theme="@style/LoginTheme">
