@@ -41,36 +41,34 @@ class TaskItemAdapter : SelectorRecyclerAdapter<TaskItemViewHolder>() {
     }
 
     override fun onBindView(holder: TaskItemViewHolder, position: Int, isSelected: Boolean) {
-        val model = TasksManager.impl.get(position)
+        val model = TasksManager[position]
 
         holder.update(model.id, position)
         holder.taskActionBtn.tag = holder
         holder.taskNameTv.text = model.name
 
-        TasksManager.impl
-                .updateViewHolder(holder.id, holder)
-
-        holder.taskActionBtn.isEnabled = true
+        TasksManager.updateViewHolder(holder.id, holder)
 
 
-        if (TasksManager.impl.isReady) {
-            val status = TasksManager.impl.getStatus(model.id, model.path)
+
+        if (TasksManager.isReady) {
+            val status = TasksManager.getStatus(model.id, model.path)
             if (status == FileDownloadStatus.pending.toInt() || status == FileDownloadStatus.started.toInt() ||
                     status == FileDownloadStatus.connected.toInt()) {
                 // start task, but file not created yet
-                holder.updateDownloading(status, TasksManager.impl.getSoFar(model.id), TasksManager.impl.getTotal(model.id), -1)
+                holder.updateDownloading(status, TasksManager.getSoFar(model.id), TasksManager.getTotal(model.id), -1)
             } else if (!File(model.path).exists() && !File(FileDownloadUtils.getTempPath(model.path)).exists()) {
                 // not exist file
                 holder.updateNotDownloaded(status, 0, 0)
-            } else if (TasksManager.impl.isDownloaded(status)) {
+            } else if (TasksManager.isDownloaded(status)) {
                 // already downloaded and exist
                 holder.updateDownloaded()
             } else if (status == FileDownloadStatus.progress.toInt()) {
                 // downloading
-                holder.updateDownloading(status, TasksManager.impl.getSoFar(model.id), TasksManager.impl.getTotal(model.id), -1)
+                holder.updateDownloading(status, TasksManager.getSoFar(model.id), TasksManager.getTotal(model.id), -1)
             } else {
                 // not start
-                holder.updateNotDownloaded(status, TasksManager.impl.getSoFar(model.id), TasksManager.impl.getTotal(model.id))
+                holder.updateNotDownloaded(status, TasksManager.getSoFar(model.id), TasksManager.getTotal(model.id))
             }
         } else {
             holder.taskStatusTv.setText(R.string.tasks_manager_demo_status_loading)
@@ -78,7 +76,6 @@ class TaskItemAdapter : SelectorRecyclerAdapter<TaskItemViewHolder>() {
         }
     }
 
-    override fun getItemCount(): Int {
-        return TasksManager.impl.taskCounts
-    }
+
+    override fun getItemCount(): Int = TasksManager.taskCounts
 }

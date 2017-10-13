@@ -21,10 +21,16 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.Menu
+import android.view.MenuItem
 import com.jiaozhu.accelerider.R
+import com.jiaozhu.accelerider.panel.taskManger.TasksManager.modelList
+import com.liulishuo.filedownloader.BaseDownloadTask
 import com.liulishuo.filedownloader.FileDownloader
+import com.liulishuo.filedownloader.model.FileDownloadStatus
 import kotlinx.android.synthetic.main.view_toolbar.*
 import kotlinx.android.synthetic.main.view_toolbar_comm.*
+import toast
 import java.lang.ref.WeakReference
 
 /**
@@ -32,6 +38,70 @@ import java.lang.ref.WeakReference
  */
 class TasksManagerActivity : AppCompatActivity(), TasksManager.INotifyDataChanged, TaskItemAdapter.TaskItemListener {
     private lateinit var adapter: TaskItemAdapter
+
+
+    private val taskDownloadListener = object : TasksManager.DownloadListener {
+        override fun warn(task: BaseDownloadTask) {
+
+        }
+
+        private fun checkCurrentHolder(task: BaseDownloadTask): TaskItemViewHolder? {
+            val tag = task.tag as? TaskItemViewHolder ?: return null
+            return if (tag.id != task.id) {
+                null
+            } else tag
+        }
+
+        override fun pending(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long) {
+            val tag = checkCurrentHolder(task) ?: return
+
+            tag.updateDownloading(FileDownloadStatus.pending.toInt(), soFarBytes.toLong(), totalBytes.toLong(), -1)
+            tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_pending)
+        }
+
+        override fun started(task: BaseDownloadTask) {
+            val tag = checkCurrentHolder(task) ?: return
+
+            tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_started)
+        }
+
+        override fun connected(task: BaseDownloadTask, etag: String, isContinue: Boolean, soFarBytes: Long, totalBytes: Long) {
+            val tag = checkCurrentHolder(task) ?: return
+
+            tag.updateDownloading(FileDownloadStatus.connected.toInt(), soFarBytes.toLong(), totalBytes.toLong(), -1)
+            tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_connected)
+        }
+
+        override fun progress(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long) {
+            val tag = checkCurrentHolder(task) ?: return
+
+            tag.updateDownloading(FileDownloadStatus.progress.toInt(), soFarBytes.toLong(), totalBytes.toLong(), task.speed)
+        }
+
+        override fun error(task: BaseDownloadTask, e: Throwable) {
+            e.printStackTrace()
+            toast(e.message)
+            val tag = checkCurrentHolder(task) ?: return
+
+            tag.updateNotDownloaded(FileDownloadStatus.error.toInt(), task.largeFileSoFarBytes, task.largeFileTotalBytes)
+            TasksManager.removeTask(task.id)
+        }
+
+        override fun paused(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long) {
+            val tag = checkCurrentHolder(task) ?: return
+
+            tag.updateNotDownloaded(FileDownloadStatus.paused.toInt(), soFarBytes.toLong(), totalBytes.toLong())
+            tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_paused)
+            TasksManager.removeTask(task.id)
+        }
+
+        override fun completed(task: BaseDownloadTask) {
+            val tag = checkCurrentHolder(task) ?: return
+
+            tag.updateDownloaded()
+            TasksManager.removeTask(task.id)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +114,8 @@ class TasksManagerActivity : AppCompatActivity(), TasksManager.INotifyDataChange
         adapter = TaskItemAdapter()
         recyclerView.adapter = adapter
         adapter.listener = this
-        TasksManager.impl.registerListener(WeakReference(this))
+        TasksManager.registerListener(WeakReference(this))
+        TasksManager.downloadListener = taskDownloadListener
     }
 
     override fun onItemClick(holder: TaskItemViewHolder, position: Int) {
@@ -52,7 +123,7 @@ class TasksManagerActivity : AppCompatActivity(), TasksManager.INotifyDataChange
     }
 
     override fun onItemLongClick(holder: TaskItemViewHolder, position: Int) {
-        showDeleteDialog(TasksManager.impl[position])
+        showDeleteDialog(TasksManager[position])
     }
 
     override fun onButtonClick(holder: TaskItemViewHolder, position: Int) {
@@ -60,9 +131,9 @@ class TasksManagerActivity : AppCompatActivity(), TasksManager.INotifyDataChange
         when (action) {
             resources.getString(R.string.pause) -> FileDownloader.getImpl().pause(holder.id)
             resources.getString(R.string.start) -> {
-                val model = TasksManager.impl[holder.position]
-                TasksManager.impl.getTaskById(model.id)?.start()
-                TasksManager.impl.updateViewHolder(holder.id, holder)
+                val model = TasksManager[holder.position]
+                TasksManager.startTask(model)
+                TasksManager.updateViewHolder(holder.id, holder)
             }
 
         }
@@ -76,12 +147,18 @@ class TasksManagerActivity : AppCompatActivity(), TasksManager.INotifyDataChange
         val builder = AlertDialog.Builder(this)
         builder.setTitle("删除任务")
         builder.setMessage("是否删除${model.name}任务（已经下载完成的文件不会删除）?")
-        builder.setPositiveButton("继续") { _, _ ->
-            TasksManager.impl.deleteTaskById(model.id)
+        builder.setPositiveButton("删除") { _, _ ->
+            TasksManager.deleteTaskById(model.id)
             adapter.notifyDataSetChanged()
         }
         builder.setNegativeButton("取消", null)
         builder.create().show()
+    }
+
+    override fun onDestroy() {
+        TasksManager.unregisterServiceConnectionListener()
+        TasksManager.downloadListener = null
+        super.onDestroy()
     }
 
 
@@ -89,6 +166,42 @@ class TasksManagerActivity : AppCompatActivity(), TasksManager.INotifyDataChange
         runOnUiThread {
             adapter.notifyDataSetChanged()
         }
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_task, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.task_clear -> clearFinished()
+            R.id.task_pause -> TasksManager.pauseAll()
+            R.id.task_start -> {
+                TasksManager.startAll()
+                adapter.notifyDataSetChanged()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
+    /**
+     * 清空已完成
+     */
+    private fun clearFinished() {
+        val needDelete = arrayListOf<Int>()
+        modelList.forEach {
+            //如果为已完成
+            if (TasksManager.isDownloaded(TasksManager.getStatus(it.id, it.path))) {
+                needDelete.add(it.id)
+            }
+        }
+        needDelete.forEach {
+            TasksManager.deleteTaskById(it)
+        }
+        adapter.notifyDataSetChanged()
     }
 
 }

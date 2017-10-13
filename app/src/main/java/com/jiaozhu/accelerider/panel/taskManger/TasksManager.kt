@@ -2,30 +2,81 @@ package com.jiaozhu.accelerider.panel.taskManger
 
 import android.text.TextUtils
 import android.util.SparseArray
-import com.jiaozhu.accelerider.R
-
+import com.jiaozhu.accelerider.support.Preferences
 import com.liulishuo.filedownloader.BaseDownloadTask
 import com.liulishuo.filedownloader.FileDownloadConnectListener
-import com.liulishuo.filedownloader.FileDownloadSampleListener
+import com.liulishuo.filedownloader.FileDownloadLargeFileListener
 import com.liulishuo.filedownloader.FileDownloader
 import com.liulishuo.filedownloader.model.FileDownloadStatus
 import com.liulishuo.filedownloader.util.FileDownloadUtils
-import java.io.File
-
 import java.lang.ref.WeakReference
 
 /**
  * Created by jiaozhu on 2017/10/12.
  */
 
-class TasksManager private constructor() {
-
+object TasksManager {
     private val dbController: TasksManagerDBController = TasksManagerDBController()
-    private val modelList: MutableList<TasksManagerModel>
+    val modelList: MutableList<TasksManagerModel>
 
     private val taskSparseArray = SparseArray<BaseDownloadTask>()
 
     private var listener: FileDownloadConnectListener? = null
+
+    private val taskDownloadListener = object : FileDownloadLargeFileListener() {
+        override fun warn(task: BaseDownloadTask) {
+            downloadListener?.warn(task)
+        }
+
+        override fun pending(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long) {
+            downloadListener?.pending(task, soFarBytes, totalBytes)
+        }
+
+        override fun started(task: BaseDownloadTask) {
+            downloadListener?.started(task)
+        }
+
+        override fun connected(task: BaseDownloadTask, etag: String, isContinue: Boolean, soFarBytes: Long, totalBytes: Long) {
+            downloadListener?.connected(task, etag, isContinue, soFarBytes, totalBytes)
+        }
+
+        override fun progress(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long) {
+            downloadListener?.progress(task, soFarBytes, totalBytes)
+        }
+
+        override fun error(task: BaseDownloadTask, e: Throwable) {
+            downloadListener?.error(task, e)
+        }
+
+        override fun paused(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long) {
+            downloadListener?.paused(task, soFarBytes, totalBytes)
+        }
+
+        override fun completed(task: BaseDownloadTask) {
+            downloadListener?.completed(task)
+
+        }
+    }
+
+    interface DownloadListener {
+        fun pending(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long)
+
+        fun started(task: BaseDownloadTask)
+
+        fun connected(task: BaseDownloadTask, etag: String, isContinue: Boolean, soFarBytes: Long, totalBytes: Long)
+
+        fun progress(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long)
+
+        fun error(task: BaseDownloadTask, e: Throwable)
+
+        fun paused(task: BaseDownloadTask, soFarBytes: Long, totalBytes: Long)
+
+        fun completed(task: BaseDownloadTask)
+
+        fun warn(task: BaseDownloadTask)
+    }
+
+    var downloadListener: DownloadListener? = null
 
     val isReady: Boolean
         get() = FileDownloader.getImpl().isServiceConnected
@@ -37,17 +88,21 @@ class TasksManager private constructor() {
         fun postNotifyDataChanged()
     }
 
-    private object HolderClass {
-        val INSTANCE = TasksManager()
-    }
-
+    //初始化列表
     init {
         modelList = dbController.allTasks
-
-        initDemo()
+        modelList.forEach {
+            if (it.isFinished == 0) {
+                val task = FileDownloader.getImpl().create(it.url)
+                        .setPath(it.path)
+                        .setWifiRequired(!Preferences.downloadWithNet)
+                        .setCallbackProgressTimes(100)
+                        .setListener(taskDownloadListener)
+                TasksManager.addTask(task)
+            }
+        }
     }
 
-    private fun initDemo() {}
 
     fun addTask(task: BaseDownloadTask) {
         taskSparseArray.put(task.id, task)
@@ -64,19 +119,17 @@ class TasksManager private constructor() {
      */
     fun deleteTaskById(id: Int) {
         dbController.deleteTaskById(id)
-        modelList.removeAt(modelList.indexOfFirst { id == it.id })
+        val model = modelList.first { id == it.id }
+        modelList.remove(model)
+        //任务未完成则删除临时文件
+        FileDownloadUtils.deleteTempFile(model.path + ".temp")
         val task = getTaskById(id) ?: return
         task.pause()
-        //任务未完成则删除临时文件
-        if (task.status != FileDownloadStatus.completed) {
-            File(task.path).delete()
-        }
         taskSparseArray.remove(id)
     }
 
     fun updateViewHolder(id: Int, holder: TaskItemViewHolder) {
         val task = taskSparseArray.get(id) ?: return
-
         task.tag = holder
     }
 
@@ -84,9 +137,13 @@ class TasksManager private constructor() {
      * 开始所有任务
      */
     fun startAll() {
-        for (i in 0 until taskSparseArray.size()) {
-            taskSparseArray.valueAt(i).start()
+        modelList.forEach {
+            startTask(it)
         }
+    }
+
+    fun pauseAll() {
+        FileDownloader.getImpl().pauseAll()
     }
 
     /**
@@ -127,7 +184,7 @@ class TasksManager private constructor() {
         FileDownloader.getImpl().addServiceConnectListener(listener)
     }
 
-    private fun unregisterServiceConnectionListener() {
+    public fun unregisterServiceConnectionListener() {
         FileDownloader.getImpl().removeServiceConnectListener(listener)
         listener = null
     }
@@ -135,6 +192,7 @@ class TasksManager private constructor() {
     fun onCreate() {
         if (!FileDownloader.getImpl().isServiceConnected) {
             FileDownloader.getImpl().bindService()
+            FileDownloader.getImpl().setMaxNetworkThreadCount(2)
         }
     }
 
@@ -157,13 +215,7 @@ class TasksManager private constructor() {
     }
 
     fun getById(id: Int): TasksManagerModel? {
-        for (model in modelList) {
-            if (model.id == id) {
-                return model
-            }
-        }
-
-        return null
+        return modelList.firstOrNull { it.id == id }
     }
 
     /**
@@ -183,9 +235,8 @@ class TasksManager private constructor() {
         return FileDownloader.getImpl().getTotal(id)
     }
 
-    fun getSoFar(id: Int): Long {
-        return FileDownloader.getImpl().getSoFar(id)
-    }
+    fun getSoFar(id: Int): Long = FileDownloader.getImpl().getSoFar(id)
+
 
     @JvmOverloads
     fun createTask(url: String, path: String? = createPath(url), name: String = url): TasksManagerModel? {
@@ -199,18 +250,28 @@ class TasksManager private constructor() {
             return model
         }
         val newModel = dbController.addTask(url, path, name)
-        if (newModel != null) {
-            modelList.add(newModel)
-        }
-        val task = FileDownloader.getImpl().create(newModel!!.url)
-                .setPath(newModel!!.path)
-                .setWifiRequired(true)
-                .setCallbackProgressTimes(100)
-                .setListener(taskDownloadListener)
-        TasksManager.impl.addTask(task)
-        task.start()
+        newModel?.let { modelList.add(it) }
         return newModel
     }
+
+
+    /**
+     * 开始下载任务
+     */
+    fun startTask(model: TasksManagerModel?) {
+        if (model == null || model.isFinished == 1) return
+        val task = FileDownloader.getImpl().create(model.url)
+                .setPath(model.path)
+                .setAutoRetryTimes(15)
+                .setWifiRequired(!Preferences.downloadWithNet)
+                .setCallbackProgressMinInterval(500)
+                .setCallbackProgressTimes(5000)
+                .setListener(taskDownloadListener)
+        TasksManager.addTask(task)
+        taskSparseArray.put(task.id, task)
+        task.start()
+    }
+
 
     fun createPath(url: String): String? {
         return if (TextUtils.isEmpty(url)) {
@@ -219,76 +280,5 @@ class TasksManager private constructor() {
 
     }
 
-    companion object {
-
-        val impl: TasksManager
-            get() = HolderClass.INSTANCE
-
-
-        private val taskDownloadListener = object : FileDownloadSampleListener() {
-
-            private fun checkCurrentHolder(task: BaseDownloadTask?): TaskItemViewHolder? {
-                val tag = task!!.tag as TaskItemViewHolder
-                return if (tag.id != task.id) {
-                    null
-                } else tag
-            }
-
-            override fun pending(task: BaseDownloadTask?, soFarBytes: Int, totalBytes: Int) {
-                super.pending(task, soFarBytes, totalBytes)
-                val tag = checkCurrentHolder(task) ?: return
-
-                tag.updateDownloading(FileDownloadStatus.pending.toInt(), soFarBytes.toLong(), totalBytes.toLong(), -1)
-                tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_pending)
-            }
-
-            override fun started(task: BaseDownloadTask?) {
-                super.started(task)
-                val tag = checkCurrentHolder(task) ?: return
-
-                tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_started)
-            }
-
-            override fun connected(task: BaseDownloadTask?, etag: String?, isContinue: Boolean, soFarBytes: Int, totalBytes: Int) {
-                super.connected(task, etag, isContinue, soFarBytes, totalBytes)
-                val tag = checkCurrentHolder(task) ?: return
-
-                tag.updateDownloading(FileDownloadStatus.connected.toInt(), soFarBytes.toLong(), totalBytes.toLong(), -1)
-                tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_connected)
-            }
-
-            override fun progress(task: BaseDownloadTask?, soFarBytes: Int, totalBytes: Int) {
-                super.progress(task, soFarBytes, totalBytes)
-                val tag = checkCurrentHolder(task) ?: return
-
-                tag.updateDownloading(FileDownloadStatus.progress.toInt(), soFarBytes.toLong(), totalBytes.toLong(), task!!.speed)
-            }
-
-            override fun error(task: BaseDownloadTask?, e: Throwable?) {
-                super.error(task, e)
-                val tag = checkCurrentHolder(task) ?: return
-
-                tag.updateNotDownloaded(FileDownloadStatus.error.toInt(), task!!.largeFileSoFarBytes, task.largeFileTotalBytes)
-                TasksManager.impl.removeTask(task.id)
-            }
-
-            override fun paused(task: BaseDownloadTask?, soFarBytes: Int, totalBytes: Int) {
-                super.paused(task, soFarBytes, totalBytes)
-                val tag = checkCurrentHolder(task) ?: return
-
-                tag.updateNotDownloaded(FileDownloadStatus.paused.toInt(), soFarBytes.toLong(), totalBytes.toLong())
-                tag.taskStatusTv.setText(R.string.tasks_manager_demo_status_paused)
-                TasksManager.impl.removeTask(task!!.id)
-            }
-
-            override fun completed(task: BaseDownloadTask?) {
-                super.completed(task)
-                val tag = checkCurrentHolder(task) ?: return
-
-                tag.updateDownloaded()
-                TasksManager.impl.removeTask(task!!.id)
-            }
-        }
-    }
 }
 

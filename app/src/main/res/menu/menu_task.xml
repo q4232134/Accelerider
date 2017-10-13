@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/task_clear"
+        android:title="清空已完成"
+        android:visible="true"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/task_pause"
+        android:title="全部暂停"
+        android:visible="true"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/task_start"
+        android:title="全部开始"
+        android:visible="true"
+        app:showAsAction="always" />
+</menu>

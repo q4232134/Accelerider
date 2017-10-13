@@ -31,6 +31,8 @@ class SettingActivity : BaseSettingsActivity() {
             setHasOptionsMenu(true)
             //绑定值
             bindPreferenceSummaryToValue(findPreference(Preferences.SETTING_ADDRESS))
+            bindPreferenceSummaryToValue(findPreference(Preferences.SETTING_WiTH_NET))
+            bindPreferenceSummaryToValue(findPreference(Preferences.SETTING_AUTO_LOGIN))
         }
 
     }

@@ -60,7 +60,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
      * 初始化下载
      */
     private fun initDownload() {
-        TasksManager.impl.onCreate()
+        TasksManager.onCreate()
     }
 
     private fun init() {
@@ -86,7 +86,8 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                 result.getJSONObject("links").entries.forEach {
                     val name = it.key
                     val url = (it.value as List<String>)[0]
-                    TasksManager.impl.createTask(url, Preferences.DownloadPath + name, name)
+                    val temp = TasksManager.createTask(url, Preferences.DownloadPath + name, name)
+                    TasksManager.startTask(temp)
                 }
             }
 
@@ -195,7 +196,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
         when (item.itemId) {
             R.id.action_change_user -> getUserList()
             R.id.action_setting -> toSettingActivity()
-            R.id.action_fresh -> fresh(addStack = false)
+            R.id.action_fresh -> fresh(stack.lastElement(), false)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -227,7 +228,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
 
 
     override fun onDestroy() {
-        TasksManager.impl.onDestroy()
+        TasksManager.onDestroy()
         FileDownloader.getImpl().pauseAll()
         super.onDestroy()
     }

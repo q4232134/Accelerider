@@ -21,7 +21,6 @@ class CApplication : Application() {
         Constants.isDebug = Tools.isDebug(this)
         Log.setLevel(if (Constants.isDebug) Log.VERBOSE else Log.ASSERT)
         FileDownloader.setup(this)
-        FileDownloader.getImpl().setMaxNetworkThreadCount(2)
     }
 
 

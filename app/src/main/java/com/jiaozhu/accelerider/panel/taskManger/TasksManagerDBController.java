@@ -39,6 +39,7 @@ public class TasksManagerDBController {
                 model.setName(c.getString(c.getColumnIndex(TasksManagerModel.NAME)));
                 model.setUrl(c.getString(c.getColumnIndex(TasksManagerModel.URL)));
                 model.setPath(c.getString(c.getColumnIndex(TasksManagerModel.PATH)));
+                model.setIsFinished(c.getInt(c.getColumnIndex(TasksManagerModel.FINISH)));
                 list.add(model);
             } while (c.moveToPrevious());
         } finally {

@@ -20,6 +20,8 @@ class Preferences<T>(val name: String, private val default: T)
          */
         val SHAREDPREFERENCES_NAME = "Setting"
         val SETTING_ADDRESS = "path"
+        val SETTING_WiTH_NET = "withNet"
+        val SETTING_AUTO_LOGIN = "autoLogin"
 
         val prefs: SharedPreferences = context.getSharedPreferences(SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE)
 
@@ -30,7 +32,10 @@ class Preferences<T>(val name: String, private val default: T)
         var name by Preferences("name", "")
         var userList by Preferences("userList", "")
         var path by Preferences(SETTING_ADDRESS, "Download")
+        //是否允许在蜂窝网络环境下进行下载
+        var downloadWithNet by Preferences(SETTING_WiTH_NET, false)
         var iSavePassWord by Preferences("ISavePassWord", false)
+        var isAutoLogin by Preferences(SETTING_AUTO_LOGIN, false)//自动登录
         //真正的下载地址
         val DownloadPath: String
             get() =

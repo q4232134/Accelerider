@@ -27,12 +27,14 @@ public class TasksManagerDBOpenHelper extends SQLiteOpenHelper {
                         + "%s INTEGER PRIMARY KEY, " // id, download id
                         + "%s VARCHAR, " // name
                         + "%s VARCHAR, " // url
-                        + "%s VARCHAR " // path
+                        + "%s VARCHAR, " // path
+                        + "%s INT " // path
                         + ")"
                 , TasksManagerModel.ID
                 , TasksManagerModel.NAME
                 , TasksManagerModel.URL
                 , TasksManagerModel.PATH
+                , TasksManagerModel.FINISH
 
         ));
     }

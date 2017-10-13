@@ -1,6 +1,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
-        android:dialogMessage="默认的下载地址(从根目录开始：XXX/XXX/XXX形式)"
+        android:dialogMessage="默认的保存路径(从根目录开始：XXX/XXX/XXX形式)"
         android:key="path"
-        android:title="下载地址" />
+        android:title="默认保存路径" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="withNet"
+        android:title="允许使用蜂窝网络进行下载" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="autoLogin"
+        android:title="自动登录" />
 </PreferenceScreen>

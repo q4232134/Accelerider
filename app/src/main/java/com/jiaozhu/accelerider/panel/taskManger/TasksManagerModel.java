@@ -11,11 +11,13 @@ public class TasksManagerModel {
     public final static String NAME = "name";
     public final static String URL = "url";
     public final static String PATH = "path";
+    public final static String FINISH = "finish";
 
     private int id;
     private String name;
     private String url;
     private String path;
+    private int isFinished = 0;
 
     public int getId() {
         return id;
@@ -49,12 +51,21 @@ public class TasksManagerModel {
         this.path = path;
     }
 
+    public int getIsFinished() {
+        return isFinished;
+    }
+
+    public void setIsFinished(int isFinished) {
+        this.isFinished = isFinished;
+    }
+
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
         cv.put(ID, id);
         cv.put(NAME, name);
         cv.put(URL, url);
         cv.put(PATH, path);
+        cv.put(FINISH, isFinished);
         return cv;
     }
 }

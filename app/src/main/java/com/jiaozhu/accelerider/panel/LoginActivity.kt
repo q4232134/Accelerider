@@ -18,12 +18,19 @@ class LoginActivity : BaseLoginActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mCheckBox.isChecked = Preferences.iSavePassWord
+        mCheckBox2.isChecked = Preferences.isAutoLogin
         mCheckBox.setOnCheckedChangeListener({ _, flag ->
             if (flag) {
                 Preferences.iSavePassWord = flag
             }
         })
+        mCheckBox2.setOnCheckedChangeListener({ _, flag ->
+            if (flag) {
+                Preferences.isAutoLogin = flag
+            }
+        })
         if (Preferences.iSavePassWord) mPassword.setText(Preferences.passWord)
+        if (Preferences.isAutoLogin) onCommitPressed()
     }
 
     /**

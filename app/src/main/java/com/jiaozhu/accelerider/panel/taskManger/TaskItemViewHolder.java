@@ -43,7 +43,7 @@ public class TaskItemViewHolder extends RecyclerView.ViewHolder {
         taskPb.setProgress(1);
 
         taskStatusTv.setText(R.string.tasks_manager_demo_status_completed);
-        taskActionBtn.setText(R.string.delete);
+        taskActionBtn.setText(R.string.finish);
     }
 
     public void updateNotDownloaded(final int status, final long sofar, final long total) {
@@ -88,10 +88,10 @@ public class TaskItemViewHolder extends RecyclerView.ViewHolder {
                 taskStatusTv.setText(R.string.tasks_manager_demo_status_connected);
                 break;
             case FileDownloadStatus.progress:
-                taskStatusTv.setText("状态: 正在下载" + (int) (percent * 100) + "%");
+                taskStatusTv.setText("状态: 正在下载      " + (int) (percent * 100) + "%");
                 break;
             default:
-                taskStatusTv.setText("状态: 正在下载" + (int) (percent * 100) + "%");
+                taskStatusTv.setText("状态: 正在下载      " + (int) (percent * 100) + "%");
                 break;
         }
         if (speed == -1) {
