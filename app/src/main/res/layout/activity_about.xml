@@ -1,0 +1,54 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:text="感谢支持，将会继续努力"
+                android:textSize="@dimen/form_text_size_little" />
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:onClick="click"
+                android:padding="10dp"
+                android:src="@drawable/zfb"
+                android:tag="支付宝" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="支付宝(点击保存二维码)"
+                android:textSize="@dimen/form_text_size_little" />
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:onClick="click"
+                android:padding="10dp"
+                android:src="@drawable/wx"
+                android:tag="微信" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="微信(点击保存二维码)"
+                android:textSize="@dimen/form_text_size_little" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

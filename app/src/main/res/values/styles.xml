@@ -10,9 +10,7 @@
         <item name="buttonStyle">@style/Widget.AppCompat.Button.Borderless.Colored</item>
     </style>
 
-    <style name="AppTheme.Setting" parent="AppTheme">
-        <item name="windowActionBar">true</item>
-        <item name="windowNoTitle">false</item>
+    <style name="AppTheme.Setting" parent="AppTheme.Base">
     </style>
 
     <style name="LoginTheme" parent="AppTheme">

@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:summary="在任务管理器长按想要删除的任务，即可弹出确认删除的对话框。"
+        android:title="如何删除下载任务?" />
+
+    <Preference
+        android:summary="应用加入了是否允许使用蜂窝网络下载的功能，但是不保证100%没问题，请谨慎使用。"
+        android:title="关于允许使用蜂窝网络下载" />
+
+    <Preference
+        android:summary="切换账户显示名称有问题，但是本人账户测试不出来"
+        android:title="已知的问题1" />
+
+    <Preference
+        android:summary="删除任务有较小可能导致缓存文件未被删除，可以在下载地址手动删除，默认下载地址为Download文件夹"
+        android:title="已知的问题2" />
+
+    <Preference
+        android:summary="如果发现问题欢迎反馈"
+        android:title="其他问题" />
+    <Preference
+        android:summary="       现在版本为最初测试版，暂时还只支持单线程下载，界面也不是很完善。
+        优先考虑添加的功能为多线程下载与下载路径的选择界面，之后考虑加入sd卡的支持。"
+        android:title="关于以后的版本" />
+
+</PreferenceScreen>

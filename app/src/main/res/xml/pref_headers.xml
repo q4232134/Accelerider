@@ -6,5 +6,13 @@
         android:fragment="com.jiaozhu.accelerider.panel.SettingActivity$GeneralPreferenceFragment"
         android:title="设定" />
 
+    <header
+        android:fragment="com.jiaozhu.accelerider.panel.SettingActivity$HelpPreferenceFragment"
+        android:title="帮助" />
+
+    <header
+        android:fragment="com.jiaozhu.accelerider.panel.SettingActivity$AboutPreferenceFragment"
+        android:title="关于" />
+
 
 </preference-headers>
