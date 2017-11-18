@@ -114,6 +114,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                 if (result.getInteger("errno") == 0) {
                     Preferences.userList = result.getString("userlist")
                     showUserListDialog(JSON.parseArray(Preferences.userList, UserModel::class.java))
+
                 }
             }
 
@@ -132,9 +133,9 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
      * 弹出账户选择列表
      */
     private fun showUserListDialog(userList: List<UserModel>) {
-        SingerPicker.showDialog(this, "账户列表", userList, { position, description ->
+        SingerPicker.showDialog(this, "账户列表", userList, { position, _ ->
             Preferences.uk = userList[position].Uk
-            Preferences.name = userList[position].Name
+            Preferences.name = userList[position].description()
             init()
             fresh()
         }, userList.indexOfFirst { it.Name == Preferences.uk }, true, true)

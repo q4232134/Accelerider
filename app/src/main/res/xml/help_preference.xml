@@ -8,12 +8,8 @@
         android:title="关于允许使用蜂窝网络下载" />
 
     <Preference
-        android:summary="切换账户显示名称有问题，但是本人账户测试不出来"
-        android:title="已知的问题1" />
-
-    <Preference
         android:summary="删除任务有较小可能导致缓存文件未被删除，可以在下载地址手动删除，默认下载地址为Download文件夹"
-        android:title="已知的问题2" />
+        android:title="已知的问题" />
 
     <Preference
         android:summary="如果发现问题欢迎反馈"

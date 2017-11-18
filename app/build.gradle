@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "jiaozhu.com.accelerider"
         minSdkVersion 21
@@ -37,5 +37,6 @@ dependencies {
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile 'com.liulishuo.filedownloader:library:1.6.6'
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.17'
+    compile 'zlc.season:rxdownload3:1.1.5'
 
 }
