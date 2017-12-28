@@ -1,12 +1,15 @@
 package com.jiaozhu.accelerider.panel
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import checkPermission
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.jiaozhu.accelerider.R
@@ -36,6 +39,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     private lateinit var adapter: FileAdapter
     private val stack = Stack<FileModel>()
     private val listener get() = DownloadTools.downloadListener
+    private val PERMISSION_FILE = 1030;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +64,23 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
      * 初始化下载
      */
     private fun initDownload() {
-        TasksManager.onCreate()
+        checkPermission(PERMISSION_FILE, Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+            TasksManager.onCreate()
+        }
+    }
+
+
+    /**
+     * 继承onRequestPermissionsResult方法
+     */
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            PERMISSION_FILE -> {
+                if (!(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    toast("未取得写文件权限，将无法进行下载")
+                }
+            }
+        }
     }
 
     private fun init() {
@@ -88,6 +108,13 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     val url = (it.value as List<String>)[0]
                     val temp = TasksManager.createTask(url, Preferences.DownloadPath + name, name)
                     TasksManager.startTask(temp)
+//                    RxDownload.create(url).retry(10)
+//                            .observeOn(AndroidSchedulers.mainThread())
+//                            .subscribe { status ->
+//                                RxDownload.start(url).subscribe()
+//                                //开始下载
+//                                println("${status.percent()}: ${status.formatDownloadSize()}")
+//                            }
                 }
             }
 

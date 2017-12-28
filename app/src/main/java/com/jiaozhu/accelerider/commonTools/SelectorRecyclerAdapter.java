@@ -10,33 +10,33 @@ import android.view.ViewGroup;
 
 import java.util.HashSet;
 
-/**
- * Created by jiaozhu on 16/3/22.
- */
-public abstract class SelectorRecyclerAdapter<T extends RecyclerView.ViewHolder>
-        extends RecyclerView.Adapter<T> {
-    protected boolean isSelectModel = false;
-    protected HashSet<Integer> selectSet = new HashSet<>();//被选中条目列表
-    private SelectorStatusChangedListener selectorListener;
-    private ItemStatusChangedListener itemListener;
-    private OnItemClickListener itemClickListener;
-    private int lastSelectedItem = 0;//上一个被选中的item(用于单选模式)
-    private int selectorMode = 0;
-    public static final int MODE_NONE = 0;//普通模式
-    public static final int MODE_SINGER = 1;//单选模式
-    public static final int MODE_MULTI = 2;//多选模式
+    /**
+     * Created by jiaozhu on 16/3/22.
+     */
+    public abstract class SelectorRecyclerAdapter<T extends RecyclerView.ViewHolder>
+            extends RecyclerView.Adapter<T> {
+        protected boolean isSelectModel = false;
+        protected HashSet<Integer> selectSet = new HashSet<>();//被选中条目列表
+        private SelectorStatusChangedListener selectorListener;
+        private ItemStatusChangedListener itemListener;
+        private OnItemClickListener itemClickListener;
+        private int lastSelectedItem = 0;//上一个被选中的item(用于单选模式)
+        private int selectorMode = 0;
+        public static final int MODE_NONE = 0;//普通模式
+        public static final int MODE_SINGER = 1;//单选模式
+        public static final int MODE_MULTI = 2;//多选模式
 
-    private ActionBar actionView;//顶部工具栏
-    private ActionItemClickedListener actionItemClickedListener;//菜单单击监听器
-    private ActionMode actionMode;
+        private ActionBar actionView;//顶部工具栏
+        private ActionItemClickedListener actionItemClickedListener;//菜单单击监听器
+        private ActionMode actionMode;
 
-    public int getSelectorMode() {
-        return selectorMode;
-    }
+        public int getSelectorMode() {
+            return selectorMode;
+        }
 
-    public void setSelectorMode(int selectorMode) {
-        this.selectorMode = selectorMode;
-    }
+        public void setSelectorMode(int selectorMode) {
+            this.selectorMode = selectorMode;
+        }
 
     public SelectorStatusChangedListener getSelectorListener() {
         return selectorListener;

@@ -50,6 +50,7 @@ object HttpClient {
         Log.i(logTag, address)
         Log.i(logTag, params.toString())
         client.post(address, params, handler)
+//        client.setUserAgent("netdisk;8.2.0;android-android;4.4.4")
     }
 
 

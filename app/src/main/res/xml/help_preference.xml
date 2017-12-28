@@ -12,6 +12,9 @@
         android:title="已知的问题" />
 
     <Preference
+        android:summary="某些任务会获取不到下载地址，少数任务会导致程序崩溃，崩溃的问题正在修复中"
+        android:title="已知的问题2" />
+    <Preference
         android:summary="如果发现问题欢迎反馈"
         android:title="其他问题" />
     <Preference

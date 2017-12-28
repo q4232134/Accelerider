@@ -7,10 +7,10 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "jiaozhu.com.accelerider"
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 26
-        versionCode 1
-        versionName "0.9"
+        versionCode 2
+        versionName "0.93"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -37,6 +37,4 @@ dependencies {
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile 'com.liulishuo.filedownloader:library:1.6.6'
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.17'
-    compile 'zlc.season:rxdownload3:1.1.5'
-
 }

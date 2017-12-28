@@ -3,7 +3,6 @@ import android.app.Application
 import com.jiaozhu.accelerider.commonTools.CrashHandler
 import com.jiaozhu.accelerider.commonTools.Log
 import com.liulishuo.filedownloader.FileDownloader
-import zlc.season.rxdownload3.core.DownloadConfig
 import java.io.File
 
 /**
@@ -23,7 +22,7 @@ class CApplication : Application() {
         Log.setLevel(if (Constants.isDebug) Log.VERBOSE else Log.ASSERT)
         FileDownloader.setup(this)
 
-        DownloadConfig.Builder.create(this).setMaxMission(2).setMaxRange(10).setDefaultPath(Preferences.DownloadPath)
+        println(Runtime.getRuntime().availableProcessors() + 1)
     }
 
 
