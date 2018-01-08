@@ -43,14 +43,14 @@
             android:id="@+id/task_status_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/task_name_tv"
-            android:layout_marginTop="1dp"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/task_name_tv"
             android:text="status: connected"
             android:textColor="@android:color/secondary_text_dark"
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/task_speed"
+            android:id="@+id/mSpeed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/task_name_tv"
@@ -60,7 +60,7 @@
             android:textSize="14sp" />
 
         <ProgressBar
-            android:id="@+id/task_pb"
+            android:id="@+id/mProgress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
     </RelativeLayout>
 
     <Button
-        android:id="@+id/task_action_btn"
+        android:id="@+id/mBtn"
         android:layout_width="60dp"
         android:layout_height="40dp"
         android:layout_marginLeft="10dp"

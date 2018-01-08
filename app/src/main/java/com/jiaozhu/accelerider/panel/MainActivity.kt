@@ -13,7 +13,6 @@ import checkPermission
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.jiaozhu.accelerider.R
-import com.jiaozhu.accelerider.commonTools.DownloadTools
 import com.jiaozhu.accelerider.commonTools.HttpResponse
 import com.jiaozhu.accelerider.commonTools.SelectorRecyclerAdapter
 import com.jiaozhu.accelerider.commonTools.SingerPicker
@@ -21,15 +20,16 @@ import com.jiaozhu.accelerider.model.FileModel
 import com.jiaozhu.accelerider.model.UserModel
 import com.jiaozhu.accelerider.panel.adapter.FileAdapter
 import com.jiaozhu.accelerider.panel.fragment.CommRecycleFragment
-import com.jiaozhu.accelerider.panel.taskManger.TasksManager
-import com.jiaozhu.accelerider.panel.taskManger.TasksManagerActivity
+import com.jiaozhu.accelerider.support.ClientFactoryImpl
 import com.jiaozhu.accelerider.support.HttpClient
 import com.jiaozhu.accelerider.support.Preferences
-import com.liulishuo.filedownloader.FileDownloader
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.view_toolbar.*
 import kotlinx.android.synthetic.main.view_toolbar_comm.*
 import toast
+import zlc.season.rxdownload3.RxDownload
+import zlc.season.rxdownload3.core.DownloadConfig
 import java.util.*
 
 class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener {
@@ -38,7 +38,6 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     private val fileList: ArrayList<FileModel> = arrayListOf()
     private lateinit var adapter: FileAdapter
     private val stack = Stack<FileModel>()
-    private val listener get() = DownloadTools.downloadListener
     private val PERMISSION_FILE = 1030;
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +54,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
         init()
         initDownload()
         mBtn.setOnClickListener {
-            val i = Intent(this@MainActivity, TasksManagerActivity::class.java)
+            val i = Intent(this@MainActivity, DownloadListActivity::class.java)
             startActivity(i)
         }
     }
@@ -65,7 +64,16 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
      */
     private fun initDownload() {
         checkPermission(PERMISSION_FILE, Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-            TasksManager.onCreate()
+            DownloadConfig.Builder.create(this)
+                    .setFps(20)                         //设置更新频率
+                    .setMaxRange(Runtime.getRuntime().availableProcessors() + 1)
+                    .setMaxMission(2)
+                    .enableAutoStart(true)              //自动开始下载
+                    .enableDb(true)                             //启用数据库
+                    .enableService(true)                        //启用Service
+                    .enableNotification(true)                   //启用Notification
+                    .setOkHttpClientFacotry(ClientFactoryImpl())
+                    .apply { DownloadConfig.init(this) }
         }
     }
 
@@ -106,15 +114,13 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                 result.getJSONObject("links").entries.forEach {
                     val name = it.key
                     val url = (it.value as List<String>)[0]
-                    val temp = TasksManager.createTask(url, Preferences.DownloadPath + name, name)
-                    TasksManager.startTask(temp)
-//                    RxDownload.create(url).retry(10)
-//                            .observeOn(AndroidSchedulers.mainThread())
-//                            .subscribe { status ->
-//                                RxDownload.start(url).subscribe()
-//                                //开始下载
-//                                println("${status.percent()}: ${status.formatDownloadSize()}")
-//                            }
+                    println(url)
+                    RxDownload.create(url).retry(10)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe { status ->
+                                println("${status.percent()}: ${status.formatDownloadSize()}")
+                                RxDownload.getAllMission().subscribe { println(it) }
+                            }
                 }
             }
 
@@ -256,8 +262,6 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
 
 
     override fun onDestroy() {
-        TasksManager.onDestroy()
-        FileDownloader.getImpl().pauseAll()
         super.onDestroy()
     }
 }

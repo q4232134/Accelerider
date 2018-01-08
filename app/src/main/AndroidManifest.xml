@@ -23,7 +23,7 @@
             android:name=".panel.SettingActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"></activity>
         <activity
-            android:name=".panel.taskManger.TasksManagerActivity"
+            android:name=".panel.DownloadListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"></activity>
         <activity
             android:name=".panel.LoginActivity"
