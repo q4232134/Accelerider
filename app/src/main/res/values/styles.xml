@@ -24,5 +24,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="android:navigationBarColor">@color/colorPrimary</item>
         <item name="android:actionBarTabTextStyle">@color/colorPrimary</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 </resources>

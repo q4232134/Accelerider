@@ -1,5 +1,7 @@
 package com.jiaozhu.accelerider.model
 
+import zlc.season.rxdownload3.core.Mission
+
 /**
  * Created by jiaozhu on 2017/10/10.
  */
@@ -15,6 +17,9 @@ data class FileModel(
         var server_filename: String = "",//
         var empty: Int = 0,//
         var md5: String? = null
-) {
+)
 
+class Task(val model: FileModel?, mission: Mission) : Mission(mission) {
+    override fun toString(): String =
+            "Task(model=$model,saveName=$saveName,savePath=$savePath,rangeFlag=$rangeFlag,tag=$tag,url=$url)"
 }

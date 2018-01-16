@@ -1,9 +1,5 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference
-        android:dialogMessage="默认的保存路径(从根目录开始：XXX/XXX/XXX形式)"
-        android:key="path"
-        android:title="默认保存路径" />
-
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <SwitchPreference
         android:defaultValue="false"
         android:key="withNet"
@@ -12,4 +8,8 @@
         android:defaultValue="false"
         android:key="autoLogin"
         android:title="自动登录" />
+    <com.jiaozhu.accelerider.commonTools.FilePickPreference
+        app:defaultPath="/Download"
+        android:key="path"
+        android:title="默认保存路径" />
 </PreferenceScreen>

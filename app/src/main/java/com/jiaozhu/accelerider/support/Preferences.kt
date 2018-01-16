@@ -31,7 +31,7 @@ class Preferences<T>(val name: String, private val default: T)
         var uk by Preferences("uk", "")
         var name by Preferences("name", "")
         var userList by Preferences("userList", "")
-        var path by Preferences(SETTING_ADDRESS, "Download")
+        var path by Preferences(SETTING_ADDRESS, "/Download")
         //是否允许在蜂窝网络环境下进行下载
         var downloadWithNet by Preferences(SETTING_WiTH_NET, false)
         var iSavePassWord by Preferences("ISavePassWord", false)
@@ -39,7 +39,7 @@ class Preferences<T>(val name: String, private val default: T)
         //真正的下载地址
         val DownloadPath: String
             get() =
-                Environment.getExternalStorageDirectory().path + File.separatorChar + path + File.separatorChar
+                Environment.getExternalStorageDirectory().path + path + File.separatorChar
     }
 
 

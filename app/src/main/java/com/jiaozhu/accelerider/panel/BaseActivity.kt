@@ -35,4 +35,6 @@ abstract class BaseActivity : AppCompatActivity(), BaseFragment.OnFragmentIntera
     }
 
 
+
+
 }

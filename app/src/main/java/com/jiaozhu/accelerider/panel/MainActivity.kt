@@ -16,7 +16,9 @@ import com.jiaozhu.accelerider.R
 import com.jiaozhu.accelerider.commonTools.HttpResponse
 import com.jiaozhu.accelerider.commonTools.SelectorRecyclerAdapter
 import com.jiaozhu.accelerider.commonTools.SingerPicker
+import com.jiaozhu.accelerider.model.CustomSqliteActor
 import com.jiaozhu.accelerider.model.FileModel
+import com.jiaozhu.accelerider.model.Task
 import com.jiaozhu.accelerider.model.UserModel
 import com.jiaozhu.accelerider.panel.adapter.FileAdapter
 import com.jiaozhu.accelerider.panel.fragment.CommRecycleFragment
@@ -30,6 +32,7 @@ import kotlinx.android.synthetic.main.view_toolbar_comm.*
 import toast
 import zlc.season.rxdownload3.RxDownload
 import zlc.season.rxdownload3.core.DownloadConfig
+import zlc.season.rxdownload3.core.Mission
 import java.util.*
 
 class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener {
@@ -49,7 +52,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
         supportFragmentManager.beginTransaction().add(R.id.layout, fragment).commit()
         adapter.itemClickListener = this
         adapter.onDownloadClickListener = SelectorRecyclerAdapter.OnItemClickListener { view, position ->
-            addDownload(fileList[position])
+            getUrls(fileList[position])
         }
         init()
         initDownload()
@@ -68,11 +71,13 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     .setFps(20)                         //设置更新频率
                     .setMaxRange(Runtime.getRuntime().availableProcessors() + 1)
                     .setMaxMission(2)
+                    .setDbActor(CustomSqliteActor(this))
                     .enableAutoStart(true)              //自动开始下载
                     .enableDb(true)                             //启用数据库
                     .enableService(true)                        //启用Service
                     .enableNotification(true)                   //启用Notification
                     .setOkHttpClientFacotry(ClientFactoryImpl())
+                    .setDefaultPath(Preferences.path)
                     .apply { DownloadConfig.init(this) }
         }
     }
@@ -102,25 +107,24 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     }
 
     /**
-     * 加入下载列表
+     * 批量获取下载链接
      */
-    private fun addDownload(vararg fileModels: FileModel) {
+    private fun getUrls(vararg fileModels: FileModel) {
         spinnerDialog.show()
         spinnerDialog.setTitle("正在获取下载地址")
         HttpClient.getDownloadUrl(fileModels.toList(), object : HttpResponse() {
 
             override fun onSuccess(statusCode: Int, result: JSONObject) {
                 println(result.toJSONString())
-                result.getJSONObject("links").entries.forEach {
+                val s = result.getJSONObject("links").entries.map {
                     val name = it.key
                     val url = (it.value as List<String>)[0]
-                    println(url)
-                    RxDownload.create(url).retry(10)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe { status ->
-                                println("${status.percent()}: ${status.formatDownloadSize()}")
-                                RxDownload.getAllMission().subscribe { println(it) }
-                            }
+                    val model = fileModels.find { model -> model.server_filename == it.key }
+                    model?.let {
+                        Task(it, Mission(url, it.server_filename, Preferences.DownloadPath + it.path))
+                    } ?: return
+                }.apply {
+                    createTask(*this.toTypedArray())
                 }
             }
 
@@ -131,8 +135,18 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             override fun onFinish() {
                 spinnerDialog.dismiss()
             }
-
         })
+    }
+
+    /**
+     * 批量生成任务
+     */
+    private fun createTask(vararg tasks: Task) {
+        tasks.forEach {
+            println(it)
+            RxDownload.create(it).retry(10).observeOn(AndroidSchedulers.mainThread()).subscribe()
+        }
+        toast("成功添加${tasks.size}个任务")
     }
 
 

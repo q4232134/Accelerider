@@ -1,7 +1,7 @@
 package com.jiaozhu.accelerider.commonTools;
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.view.ActionMode;
+import android.annotation.SuppressLint;
+import android.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,33 +10,33 @@ import android.view.ViewGroup;
 
 import java.util.HashSet;
 
-    /**
-     * Created by jiaozhu on 16/3/22.
-     */
-    public abstract class SelectorRecyclerAdapter<T extends RecyclerView.ViewHolder>
-            extends RecyclerView.Adapter<T> {
-        protected boolean isSelectModel = false;
-        protected HashSet<Integer> selectSet = new HashSet<>();//被选中条目列表
-        private SelectorStatusChangedListener selectorListener;
-        private ItemStatusChangedListener itemListener;
-        private OnItemClickListener itemClickListener;
-        private int lastSelectedItem = 0;//上一个被选中的item(用于单选模式)
-        private int selectorMode = 0;
-        public static final int MODE_NONE = 0;//普通模式
-        public static final int MODE_SINGER = 1;//单选模式
-        public static final int MODE_MULTI = 2;//多选模式
+/**
+ * Created by jiaozhu on 16/3/22.
+ */
+public abstract class SelectorRecyclerAdapter<T extends RecyclerView.ViewHolder>
+        extends RecyclerView.Adapter<T> {
+    protected boolean isSelectModel = false;
+    protected HashSet<Integer> selectSet = new HashSet<>();//被选中条目列表
+    private SelectorStatusChangedListener selectorListener;
+    private ItemStatusChangedListener itemListener;
+    private OnItemClickListener itemClickListener;
+    private int lastSelectedItem = 0;//上一个被选中的item(用于单选模式)
+    private int selectorMode = 0;
+    public static final int MODE_NONE = 0;//普通模式
+    public static final int MODE_SINGER = 1;//单选模式
+    public static final int MODE_MULTI = 2;//多选模式
 
-        private ActionBar actionView;//顶部工具栏
-        private ActionItemClickedListener actionItemClickedListener;//菜单单击监听器
-        private ActionMode actionMode;
+    private View actionView;//顶部工具栏
+    private ActionItemClickedListener actionItemClickedListener;//菜单单击监听器
+    private ActionMode actionMode;
 
-        public int getSelectorMode() {
-            return selectorMode;
-        }
+    public int getSelectorMode() {
+        return selectorMode;
+    }
 
-        public void setSelectorMode(int selectorMode) {
-            this.selectorMode = selectorMode;
-        }
+    public void setSelectorMode(int selectorMode) {
+        this.selectorMode = selectorMode;
+    }
 
     public SelectorStatusChangedListener getSelectorListener() {
         return selectorListener;
@@ -68,7 +68,7 @@ import java.util.HashSet;
      * @param actionView                toolbar或者actionbar
      * @param actionItemClickedListener 回调监听
      */
-    public void setActionView(ActionBar actionView, ActionItemClickedListener actionItemClickedListener) {
+    public void setActionView(View actionView, ActionItemClickedListener actionItemClickedListener) {
         this.actionView = actionView;
         this.actionItemClickedListener = actionItemClickedListener;
     }
@@ -129,6 +129,7 @@ import java.util.HashSet;
     /**
      * 启动action模式
      */
+    @SuppressLint("RestrictedApi")
     private void startActionMode() {
         if (actionView != null && actionItemClickedListener != null) {
             actionMode = actionView.startActionMode(new ActionMode.Callback() {
