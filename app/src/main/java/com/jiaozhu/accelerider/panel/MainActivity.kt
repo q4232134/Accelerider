@@ -80,6 +80,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     .enableNotification(true)                   //启用Notification
                     .setOkHttpClientFacotry(ClientFactoryImpl())
                     .setDefaultPath(Preferences.path)
+                    .setOnlyWifiDownload(!Preferences.downloadWithNet)
                     .apply { DownloadConfig.init(this) }
         }
     }

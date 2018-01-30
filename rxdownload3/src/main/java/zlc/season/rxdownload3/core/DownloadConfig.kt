@@ -116,6 +116,12 @@ object DownloadConfig {
             }
         }
 
+        fun setOnlyWifiDownload(only: Boolean): Builder {
+            this.onlyWifiDownload = only
+            return this
+        }
+
+
         fun setDebug(debug: Boolean): Builder {
             this.debug = debug
             return this
