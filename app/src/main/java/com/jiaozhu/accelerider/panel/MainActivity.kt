@@ -25,6 +25,7 @@ import com.jiaozhu.accelerider.panel.fragment.CommRecycleFragment
 import com.jiaozhu.accelerider.support.ClientFactoryImpl
 import com.jiaozhu.accelerider.support.HttpClient
 import com.jiaozhu.accelerider.support.Preferences
+import com.jiaozhu.accelerider.support.Tools
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.view_toolbar.*
@@ -60,6 +61,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             val i = Intent(this@MainActivity, DownloadListActivity::class.java)
             startActivity(i)
         }
+        mBtn.setOnLongClickListener { getDatabasePath("RxDownload.db").let { Tools.copyFile(it.path, Preferences.DownloadPath + "1.db") }.apply { toast(it.toString()) } }
     }
 
     /**
@@ -121,7 +123,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     val url = (it.value as List<String>)[0]
                     val model = fileModels.find { model -> model.server_filename == it.key }
                     model?.let {
-                        Task(it, Mission(url, it.server_filename, Preferences.DownloadPath + it.path))
+                        Task(it, Mission(url, it.server_filename, Preferences.DownloadPath + it.path.substringBeforeLast("/")).apply { tag = Preferences.name + ":" + it.path })
                     } ?: return
                 }.apply {
                     createTask(*this.toTypedArray())
@@ -146,7 +148,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             println(it)
             RxDownload.create(it).retry(10).observeOn(AndroidSchedulers.mainThread()).subscribe()
         }
-        toast("成功添加${tasks.size}个任务")
+        toast("添加${tasks.size}个任务")
     }
 
 

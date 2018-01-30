@@ -12,8 +12,11 @@ import com.jiaozhu.accelerider.commonTools.SelectorRecyclerAdapter
 import com.jiaozhu.accelerider.commonTools.SelectorRecyclerAdapter.MODE_MULTI
 import com.jiaozhu.accelerider.model.Task
 import com.jiaozhu.accelerider.support.HttpClient
+import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.disposables.Disposable
+import io.reactivex.internal.operators.maybe.MaybeToPublisher
 import kotlinx.android.synthetic.main.activity_tasks_manager.*
 import kotlinx.android.synthetic.main.item_tasks_manager.view.*
 import kotlinx.android.synthetic.main.view_toolbar.*
@@ -48,7 +51,14 @@ class DownloadListActivity : BaseActivity() {
                     val id = item.itemId
                     when (id) {
                         R.id.action_delete -> {
-                            println(adapter.selectList)
+                            val temp = mutableListOf<Maybe<Any>>()
+                            adapter.selectList.forEach {
+                                temp.add(RxDownload.delete(list[it], true))
+                                temp.add(RxDownload.clear(list[it]))
+                            }
+                            Flowable.fromIterable(temp)
+                                    .flatMap(MaybeToPublisher.INSTANCE)
+                                    .lastElement().subscribe { loadData() }
                             return true
                         }
                         R.id.action_fresh -> {
@@ -69,7 +79,6 @@ class DownloadListActivity : BaseActivity() {
         RxDownload.getAllMission().observeOn(mainThread()).subscribe {
             list.clear()
             list.addAll(it as Collection<Task>)
-            println(list)
             adapter.notifyDataSetChanged()
         }
     }
@@ -82,10 +91,10 @@ class DownloadListActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.task_clear -> {
-                RxDownload.deleteAll(true).subscribe { loadData() }
+                RxDownload.deleteAll().subscribe { RxDownload.clearAll().subscribe { loadData() } }
             }
             R.id.task_pause -> RxDownload.stopAll().subscribe()
-            R.id.task_start -> RxDownload.startAll().subscribe()
+            R.id.task_start -> list.forEach { RxDownload.start(it).subscribe() }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -132,13 +141,13 @@ class DownloadListActivity : BaseActivity() {
     fun freshUrls(vararg tasks: Task) {
         spinnerDialog.show()
         spinnerDialog.setTitle("正在获取下载地址")
-        HttpClient.getDownloadUrl(tasks.map { it.model ?: return }, object : HttpResponse() {
+        HttpClient.getDownloadUrl(tasks.map { it.model }, object : HttpResponse() {
 
             override fun onSuccess(statusCode: Int, result: JSONObject) {
                 val s = result.getJSONObject("links").entries.map {
                     val name = it.key
                     val url = (it.value as List<String>)[0]
-                    tasks.find { model -> model.model?.server_filename == it.key }?.apply { this.url = url }.let { RxDownload.update(it as Mission) }
+                    tasks.find { model -> model.model.server_filename == it.key }?.apply { this.url = url }.let { RxDownload.update(it as Mission).subscribe() }
                 }
             }
 
@@ -172,7 +181,7 @@ class DownloadListActivity : BaseActivity() {
         }
 
         private fun start() {
-            RxDownload.start(task!!.url).subscribe({}, { println(it) })
+            RxDownload.start(task!!).subscribe({}, { println(it) })
         }
 
         /**
@@ -183,7 +192,7 @@ class DownloadListActivity : BaseActivity() {
         }
 
         private fun stop() {
-            RxDownload.stop(task!!.url).subscribe()
+            RxDownload.stop(task!!).subscribe()
         }
 
         fun setData(mission: Task) {
@@ -191,21 +200,19 @@ class DownloadListActivity : BaseActivity() {
         }
 
         fun onAttach() {
-            disposable = RxDownload.create(task!!.url)
-                    .observeOn(mainThread())
-                    .subscribe {
-                        if (currentStatus is Failed) {
-                            loge("Failed", (currentStatus as Failed).throwable)
-                        }
-                        currentStatus = it
-                        view.task_name_tv.text = task?.saveName
-                        if (it is Succeed) {
-                            it.downloadSize = it.totalSize
-                        }
-                        view.mSpeed.text = it.percent()
-                        setProgress(it)
-                        setActionText(it)
-                    }
+            disposable = RxDownload.get(task!!)?.observeOn(mainThread())?.subscribe {
+                if (currentStatus is Failed) {
+                    loge("Failed", (currentStatus as Failed).throwable)
+                }
+                currentStatus = it
+                view.task_name_tv.text = task?.saveName
+                if (it is Succeed) {
+                    it.downloadSize = it.totalSize
+                }
+                view.mSpeed.text = it.formatSpeed
+                setProgress(it)
+                setActionText(it)
+            }
         }
 
         fun onDetach() {

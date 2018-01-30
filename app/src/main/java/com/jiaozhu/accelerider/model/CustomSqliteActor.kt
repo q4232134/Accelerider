@@ -1,6 +1,7 @@
 package com.jiaozhu.accelerider.model
 
 import android.content.ContentValues
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.database.Cursor
 import com.alibaba.fastjson.JSON
@@ -27,6 +28,12 @@ class CustomSqliteActor(context: Context) : SQLiteActor(context) {
             """
     }
 
+//    override fun delete(mission: RealMission) {
+//        val actual = mission.actual
+//        val writableDatabase = sqLiteOpenHelper.writableDatabase
+//        writableDatabase.delete(TABLE_NAME, "$TAG=?", arrayOf(actual.tag))
+//    }
+
     override fun onCreate(mission: RealMission): ContentValues {
         val cv = super.onCreate(mission)
         if (mission.actual is Task) {
@@ -39,6 +46,6 @@ class CustomSqliteActor(context: Context) : SQLiteActor(context) {
     override fun onGetAllMission(cursor: Cursor): Mission {
         val mission = super.onGetAllMission(cursor)
         var model = cursor.getString(cursor.getColumnIndexOrThrow(MODEL))?.let { JSON.parseObject(it, FileModel::class.java) }
-        return Task(model, mission)
+        return Task(model!!, mission)
     }
 }

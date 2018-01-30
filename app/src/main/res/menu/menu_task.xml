@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/task_clear"
-        android:title="清空已完成"
+        android:title="清空所有"
         android:visible="true"
         app:showAsAction="always" />
     <item

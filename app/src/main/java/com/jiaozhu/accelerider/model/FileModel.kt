@@ -19,7 +19,7 @@ data class FileModel(
         var md5: String? = null
 )
 
-class Task(val model: FileModel?, mission: Mission) : Mission(mission) {
+class Task(val model: FileModel, mission: Mission) : Mission(mission) {
     override fun toString(): String =
             "Task(model=$model,saveName=$saveName,savePath=$savePath,rangeFlag=$rangeFlag,tag=$tag,url=$url)"
 }
