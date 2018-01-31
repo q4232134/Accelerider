@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -52,9 +53,31 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
         fragment = CommRecycleFragment.newInstance(fileList, adapter)
         supportFragmentManager.beginTransaction().add(R.id.layout, fragment).commit()
         adapter.itemClickListener = this
+        adapter.selectorMode = SelectorRecyclerAdapter.MODE_MULTI
         adapter.onDownloadClickListener = SelectorRecyclerAdapter.OnItemClickListener { view, position ->
             getUrls(fileList[position])
         }
+        adapter.setActionView(mToolbar, object : SelectorRecyclerAdapter.ActionItemClickedListener {
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                val inflater = mode.menuInflater
+                inflater.inflate(R.menu.menu_action_main, menu)
+                return true
+            }
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                val id = item.itemId
+                when (id) {
+                    R.id.action_download -> {
+                        val temps = adapter.selectList.map { fileList[it] }
+                        getFileList(temps) {
+                            getUrls(*it.toTypedArray(), splitName = stack.lastElement().path+"/")
+                        }
+                        return true
+                    }
+                }
+                return false
+            }
+        })
         init()
         initDownload()
         mBtn.setOnClickListener {
@@ -74,6 +97,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     .setMaxRange(Runtime.getRuntime().availableProcessors() + 1)
                     .setMaxMission(2)
                     .setDbActor(CustomSqliteActor(this))
+                    .setRetryTimes(5)
                     .enableAutoStart(true)              //自动开始下载
                     .enableDb(true)                             //启用数据库
                     .enableService(true)                        //启用Service
@@ -110,11 +134,75 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     }
 
     /**
+     * 下载选中的文件或者文件夹，文件夹自动展开下载对应文件
+     */
+    private fun getFileList(fileModels: List<FileModel>, finish: (List<FileModel>) -> Unit) {
+        spinnerDialog.setTitle("正在获取文件目录")
+        spinnerDialog.show()
+        val map = fileModels.groupBy { it.isdir == 0 }
+        val list = mutableListOf<FileModel>()
+        val dirs = mutableListOf<FileModel>()
+        list.addAll(map[true] ?: emptyList())
+        dirs.addAll(map[false] ?: emptyList())
+        /**
+         * 弹出第一个文件夹
+         */
+        fun getFirst(): FileModel? {
+            val temp = dirs.getOrNull(0) ?: return null
+            dirs.removeAt(0)
+            return temp
+        }
+
+        /**
+         * 展开指定文件夹
+         */
+        fun open(model: FileModel?, finish: () -> Unit) {
+            if (model == null) {
+                finish.invoke()
+//                spinnerDialog.dismiss()
+                return
+            }
+            openDir(model, {
+                it.forEach {
+                    if (it.isdir == 0) {
+                        list.add(it)
+                    } else {
+                        dirs.add(it)
+                    }
+                }
+                open(getFirst(), finish)
+            }, {
+                toast(it)
+                open(getFirst(), finish)
+            })
+            dirs.remove(model)
+        }
+
+        open(getFirst()) {
+            finish.invoke(list)
+        }
+    }
+
+
+    private fun openDir(model: FileModel, suc: (List<FileModel>) -> Unit, fail: (String) -> Unit) {
+        HttpClient.getFileList(model.path, object : HttpResponse() {
+            override fun onSuccess(statusCode: Int, result: JSONObject) {
+                suc.invoke(result.getJSONArray("list").toJavaList(FileModel::class.java) as List<FileModel>)
+            }
+
+            override fun onFailure(statusCode: Int, msg: String, error: Throwable) {
+                fail(msg)
+            }
+
+        })
+    }
+
+    /**
      * 批量获取下载链接
      */
-    private fun getUrls(vararg fileModels: FileModel) {
-        spinnerDialog.show()
+    private fun getUrls(vararg fileModels: FileModel, splitName: String = "") {
         spinnerDialog.setTitle("正在获取下载地址")
+        spinnerDialog.show()
         HttpClient.getDownloadUrl(fileModels.toList(), object : HttpResponse() {
 
             override fun onSuccess(statusCode: Int, result: JSONObject) {
@@ -124,11 +212,9 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     val url = (it.value as List<String>)[0]
                     val model = fileModels.find { model -> model.server_filename == it.key }
                     model?.let {
-                        Task(it, Mission(url, it.server_filename, Preferences.DownloadPath + it.path.substringBeforeLast("/")).apply { tag = Preferences.name + ":" + it.path })
+                        Task(it, Mission(url, it.server_filename, Preferences.DownloadPath + it.path.substringAfter(splitName).substringBeforeLast("/")).apply { tag = Preferences.name + ":" + it.path })
                     } ?: return
-                }.apply {
-                    createTask(*this.toTypedArray())
-                }
+                }.apply { createTask(*this.toTypedArray()) }
             }
 
             override fun onFailure(statusCode: Int, msg: String?, error: Throwable?) {
@@ -146,7 +232,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
      */
     private fun createTask(vararg tasks: Task) {
         tasks.forEach {
-            println(it)
+//            println(it)
             RxDownload.create(it).retry(10).observeOn(AndroidSchedulers.mainThread()).subscribe()
         }
         toast("添加${tasks.size}个任务")

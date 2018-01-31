@@ -2,28 +2,13 @@ package zlc.season.rxdownload3.core
 
 import zlc.season.rxdownload3.helper.formatSize
 import java.text.NumberFormat.getPercentInstance
-import kotlin.properties.Delegates
 
 
-open class Status(var totalSize: Long = 0L,
+open class Status(var downloadSize: Long = 0L,
+                  var totalSize: Long = 0L,
                   var chunkFlag: Boolean = false) {
-    constructor(downloadSize: Long, totalSize: Long, chunkFlag: Boolean) : this(totalSize, chunkFlag) {
-        this.downloadSize = downloadSize
-    }
 
     constructor(status: Status) : this(status.downloadSize, status.totalSize, status.chunkFlag)
-
-    var downloadSize by Delegates.observable(0L) { _, old, new ->
-        val currentTime = System.currentTimeMillis()
-        val duration = (currentTime - recordTime) / 1000.0
-        recordTime = currentTime
-        speed = ((new - old) / duration).toLong()
-    }
-
-    var recordTime = System.currentTimeMillis()
-    var speed = 0L
-
-    val formatSpeed get() = "${formatSize(speed)}/s"
 
     fun formatTotalSize(): String {
         return formatSize(totalSize)

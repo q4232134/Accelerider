@@ -31,6 +31,7 @@ object DownloadConfig {
     internal var onlyWifiDownload = false
 
     internal var fps = 30
+    internal var retryTimes = 0
 
     internal var autoStart = false
 
@@ -56,6 +57,7 @@ object DownloadConfig {
         this.maxMission = builder.maxMission
         this.maxRange = builder.maxRange
         this.defaultSavePath = builder.defaultSavePath
+        this.retryTimes = builder.retryTimes
 
         this.autoStart = builder.autoStart
 
@@ -86,7 +88,7 @@ object DownloadConfig {
     class Builder private constructor(val context: Context) {
         internal var maxMission = 3
         internal var maxRange = Runtime.getRuntime().availableProcessors() + 1
-
+        internal var retryTimes = 0
         internal var debug = true
 
         internal var autoStart = false
@@ -159,6 +161,11 @@ object DownloadConfig {
 
         fun enableService(enable: Boolean): Builder {
             this.enableService = enable
+            return this
+        }
+
+        fun setRetryTimes(times: Int): Builder {
+            this.retryTimes = times
             return this
         }
 

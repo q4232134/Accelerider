@@ -6,7 +6,6 @@ import io.reactivex.internal.operators.maybe.MaybeToPublisher.INSTANCE
 import io.reactivex.schedulers.Schedulers.newThread
 import zlc.season.rxdownload3.extension.Extension
 import zlc.season.rxdownload3.helper.ANY
-import zlc.season.rxdownload3.helper.isWifi
 import java.io.File
 import java.util.concurrent.Semaphore
 
@@ -64,7 +63,6 @@ class LocalMissionBox : MissionBox {
 
 
     override fun start(mission: Mission): Maybe<Any> {
-        if (DownloadConfig.onlyWifiDownload && !isWifi()) return Maybe.error(RuntimeException("Only in wifi can be download"))
         val realMission = SET.find { it.actual == mission }
                 ?: return Maybe.error(RuntimeException("Mission not create"))
         return realMission.start()
@@ -96,7 +94,6 @@ class LocalMissionBox : MissionBox {
     }
 
     override fun startAll(): Maybe<Any> {
-        if (DownloadConfig.onlyWifiDownload && !isWifi()) return Maybe.error(RuntimeException("Only in wifi can be download"))
         val arrays = mutableListOf<Maybe<Any>>()
         SET.forEach { arrays.add(it.start()) }
         return Flowable.fromIterable(arrays)
@@ -141,7 +138,6 @@ class LocalMissionBox : MissionBox {
             //stop first.
             realMission.realStop()
             SET.remove(realMission)
-            it.onSuccess(ANY)
         }
     }
 

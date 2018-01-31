@@ -3,13 +3,14 @@
     <SwitchPreference
         android:defaultValue="false"
         android:key="withNet"
+        android:summary="重启应用生效"
         android:title="允许使用蜂窝网络进行下载" />
     <SwitchPreference
         android:defaultValue="false"
         android:key="autoLogin"
         android:title="自动登录" />
     <com.jiaozhu.accelerider.commonTools.FilePickPreference
-        app:defaultPath="/Download"
         android:key="path"
-        android:title="默认保存路径" />
+        android:title="默认保存路径"
+        app:defaultPath="/Download" />
 </PreferenceScreen>

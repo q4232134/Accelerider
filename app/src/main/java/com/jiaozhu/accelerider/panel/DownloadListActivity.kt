@@ -13,7 +13,6 @@ import com.jiaozhu.accelerider.commonTools.SelectorRecyclerAdapter.MODE_MULTI
 import com.jiaozhu.accelerider.model.Task
 import com.jiaozhu.accelerider.support.HttpClient
 import io.reactivex.Flowable
-import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.disposables.Disposable
 import io.reactivex.internal.operators.maybe.MaybeToPublisher
@@ -43,7 +42,7 @@ class DownloadListActivity : BaseActivity() {
             setActionView(mToolbar, object : SelectorRecyclerAdapter.ActionItemClickedListener {
                 override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
                     val inflater = mode.menuInflater
-                    inflater.inflate(R.menu.menu_action, menu)
+                    inflater.inflate(R.menu.menu_action_list, menu)
                     return true
                 }
 
@@ -51,12 +50,7 @@ class DownloadListActivity : BaseActivity() {
                     val id = item.itemId
                     when (id) {
                         R.id.action_delete -> {
-                            val temp = mutableListOf<Maybe<Any>>()
-                            adapter.selectList.forEach {
-                                temp.add(RxDownload.delete(list[it], true))
-                                temp.add(RxDownload.clear(list[it]))
-                            }
-                            Flowable.fromIterable(temp)
+                            Flowable.fromIterable(adapter.selectList.map { RxDownload.delete(list[it], true) })
                                     .flatMap(MaybeToPublisher.INSTANCE)
                                     .lastElement().subscribe { loadData() }
                             return true
@@ -74,7 +68,6 @@ class DownloadListActivity : BaseActivity() {
         loadData()
     }
 
-
     private fun loadData() {
         RxDownload.getAllMission().observeOn(mainThread()).subscribe {
             list.clear()
@@ -91,7 +84,7 @@ class DownloadListActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.task_clear -> {
-                RxDownload.deleteAll().subscribe { RxDownload.clearAll().subscribe { loadData() } }
+                RxDownload.deleteAll().subscribe { loadData() }
             }
             R.id.task_pause -> RxDownload.stopAll().subscribe()
             R.id.task_start -> list.forEach { RxDownload.start(it).subscribe() }
@@ -200,16 +193,16 @@ class DownloadListActivity : BaseActivity() {
         }
 
         fun onAttach() {
-            disposable = RxDownload.get(task!!)?.observeOn(mainThread())?.subscribe {
+            disposable = RxDownload.create(task!!).observeOn(mainThread()).subscribe {
                 if (currentStatus is Failed) {
                     loge("Failed", (currentStatus as Failed).throwable)
                 }
                 currentStatus = it
                 view.task_name_tv.text = task?.saveName
-                if (it is Succeed) {
+                if (currentStatus is Succeed) {
                     it.downloadSize = it.totalSize
                 }
-                view.mSpeed.text = it.formatSpeed
+                view.mSpeed.text = it.percent()
                 setProgress(it)
                 setActionText(it)
             }
