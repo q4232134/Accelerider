@@ -8,18 +8,10 @@
         android:title="关于允许使用蜂窝网络下载" />
 
     <Preference
-        android:summary="删除任务有较小可能导致缓存文件未被删除，可以在下载地址手动删除，默认下载地址为Download文件夹"
-        android:title="已知的问题" />
-
-    <Preference
-        android:summary="某些任务会获取不到下载地址，少数任务会导致程序崩溃，崩溃的问题正在修复中"
-        android:title="已知的问题2" />
-    <Preference
         android:summary="如果发现问题欢迎反馈"
         android:title="其他问题" />
     <Preference
-        android:summary="       现在版本为最初测试版，暂时还只支持单线程下载，界面也不是很完善。
-        优先考虑添加的功能为多线程下载与下载路径的选择界面，之后考虑加入sd卡的支持。"
-        android:title="关于以后的版本" />
+        android:summary="更换了下载引擎，支持多线程下载，支持长按选中文件或者文件夹进行批量下载。因为更换了新的下载引擎，所以很有可能出现不稳定的情况。"
+        android:title="更新内容" />
 
 </PreferenceScreen>
