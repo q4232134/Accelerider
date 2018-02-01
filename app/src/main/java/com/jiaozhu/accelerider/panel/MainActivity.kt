@@ -70,7 +70,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     R.id.action_download -> {
                         val temps = adapter.selectList.map { fileList[it] }
                         getFileList(temps) {
-                            getUrls(*it.toTypedArray(), splitName = stack.lastElement().path+"/")
+                            getUrls(*it.toTypedArray(), splitName = stack.lastElement().path + "/")
                         }
                         return true
                     }
@@ -79,12 +79,30 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
             }
         })
         init()
+        checkVersion()
         initDownload()
         mBtn.setOnClickListener {
             val i = Intent(this@MainActivity, DownloadListActivity::class.java)
             startActivity(i)
         }
         mBtn.setOnLongClickListener { getDatabasePath("RxDownload.db").let { Tools.copyFile(it.path, Preferences.DownloadPath + "1.db") }.apply { toast(it.toString()) } }
+    }
+
+    private fun checkVersion() {
+        val temp = Tools.getVersion(this)
+        if (Preferences.currentVersion != temp) {
+            showVersionDialog()
+            Preferences.currentVersion = temp
+        }
+    }
+
+    private fun showVersionDialog() {
+        AlertDialog.Builder(this).apply {
+            setTitle("更新说明")
+            setMessage(R.string.version_description)
+            setPositiveButton("确定", null)
+        }.create().show()
+
     }
 
     /**
@@ -232,7 +250,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
      */
     private fun createTask(vararg tasks: Task) {
         tasks.forEach {
-//            println(it)
+            //            println(it)
             RxDownload.create(it).retry(10).observeOn(AndroidSchedulers.mainThread()).subscribe()
         }
         toast("添加${tasks.size}个任务")

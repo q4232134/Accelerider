@@ -14,7 +14,6 @@ class Preferences<T>(val name: String, private val default: T)
     : ReadWriteProperty<Any?, T> {
 
     companion object {
-        private var context: Context = UserInfo.context
         /**
          * 配置文件名称
          */
@@ -23,8 +22,9 @@ class Preferences<T>(val name: String, private val default: T)
         val SETTING_WiTH_NET = "withNet"
         val SETTING_AUTO_LOGIN = "autoLogin"
 
-        val prefs: SharedPreferences = context.getSharedPreferences(SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE)
+        val prefs: SharedPreferences = UserInfo.context.getSharedPreferences(SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE)
 
+        var currentVersion: String by Preferences("Version", "0")
         var userName by Preferences("UserName", "")
         var passWord by Preferences("PassWord", "")
         var token by Preferences("token", "")
@@ -43,9 +43,7 @@ class Preferences<T>(val name: String, private val default: T)
     }
 
 
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return findPreference(name, default)
-    }
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T = findPreference(name, default)
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         putPreference(name, value)
@@ -75,3 +73,5 @@ class Preferences<T>(val name: String, private val default: T)
         res as T
     }
 }
+
+
