@@ -92,7 +92,7 @@ object HttpClient {
         val params = basicParams
         params.put("files", JSON.toJSONString(files))
         post("http://api.usmusic.cn/filelinks?token=${Preferences.token}" +
-                "&uk=${Preferences.uk}&method=APPID", params, handler)
+                "&uk=${Preferences.uk}&method=JUMP", params, handler)
     }
 
 }

@@ -138,6 +138,7 @@ class LocalMissionBox : MissionBox {
             //stop first.
             realMission.realStop()
             SET.remove(realMission)
+            it.onSuccess(ANY)
         }
     }
 

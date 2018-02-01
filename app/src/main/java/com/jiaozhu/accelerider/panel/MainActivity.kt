@@ -70,7 +70,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     R.id.action_download -> {
                         val temps = adapter.selectList.map { fileList[it] }
                         getFileList(temps) {
-                            getUrls(*it.toTypedArray(), splitName = stack.lastElement().path + "/")
+                            getUrls(*it.toTypedArray())
                         }
                         return true
                     }
@@ -123,6 +123,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     .setOkHttpClientFacotry(ClientFactoryImpl())
                     .setDefaultPath(Preferences.path)
                     .setOnlyWifiDownload(!Preferences.downloadWithNet)
+                    .setDebug(true)
                     .apply { DownloadConfig.init(this) }
         }
     }
@@ -218,7 +219,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     /**
      * 批量获取下载链接
      */
-    private fun getUrls(vararg fileModels: FileModel, splitName: String = "") {
+    private fun getUrls(vararg fileModels: FileModel, splitName: String? = null) {
         spinnerDialog.setTitle("正在获取下载地址")
         spinnerDialog.show()
         HttpClient.getDownloadUrl(fileModels.toList(), object : HttpResponse() {
@@ -230,7 +231,8 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
                     val url = (it.value as List<String>)[0]
                     val model = fileModels.find { model -> model.server_filename == it.key }
                     model?.let {
-                        Task(it, Mission(url, it.server_filename, Preferences.DownloadPath + it.path.substringAfter(splitName).substringBeforeLast("/")).apply { tag = Preferences.name + ":" + it.path })
+                        val savePath = if (splitName == null) Preferences.DownloadPath else Preferences.DownloadPath + it.path.substringAfter(splitName).substringBeforeLast("/")
+                        Task(it, Mission(url, it.server_filename + ".zip", savePath).apply { tag = Preferences.name + ":" + it.path })
                     } ?: return
                 }.apply { createTask(*this.toTypedArray()) }
             }
@@ -251,7 +253,7 @@ class MainActivity : BaseActivity(), SelectorRecyclerAdapter.OnItemClickListener
     private fun createTask(vararg tasks: Task) {
         tasks.forEach {
             //            println(it)
-            RxDownload.create(it).retry(10).observeOn(AndroidSchedulers.mainThread()).subscribe()
+            RxDownload.create(it) .retry(10).observeOn(AndroidSchedulers.mainThread()).subscribe()
         }
         toast("添加${tasks.size}个任务")
     }
